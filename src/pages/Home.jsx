@@ -1,9 +1,11 @@
-import { startTransition } from 'react'
+import { startTransition, useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import SpinWheel from '../components/SpinWheel'
 import PlayerPicker from '../components/PlayerPicker'
 import FormationPicker from '../components/FormationPicker'
 import SquadPanel from '../components/SquadPanel'
+import ReviewCard from '../components/ReviewCard'
+import { reviewTeam } from '../utils/reviewTeam'
 import useSquadBuilder, { SQUAD_SIZE } from '../hooks/useSquadBuilder'
 
 export default function Home() {
@@ -18,12 +20,33 @@ export default function Home() {
     resetGame,
   } = useSquadBuilder()
 
-  /* Wrap spin result in startTransition so the wheel exit stays smooth */
+  const [review, setReview] = useState(null)
+  const [isReviewing, setIsReviewing] = useState(false)
+
   const onSpinResult = (nation) => {
     startTransition(() => {
       handleSpinResult(nation)
     })
   }
+
+  const handleAIReview = async ({ formation }) => {
+    setIsReviewing(true)
+    try {
+      const res = await reviewTeam(currentXI, formation)
+      setReview(res)
+    } catch (err) {
+      console.error('AI review failed:', err)
+    } finally {
+      setIsReviewing(false)
+    }
+  }
+
+  const onResetGame = () => {
+    setReview(null)
+    setIsReviewing(false)
+    resetGame()
+  }
+
 
   return (
     <main
@@ -114,7 +137,8 @@ export default function Home() {
           >
             {phase === 'spinning' && currentXI.length === 0 && 'Spin to pick a nation, then draft a player for your squad.'}
             {phase === 'spinning' && currentXI.length > 0  && `${SQUAD_SIZE - currentXI.length} more picks to go — spin again!`}
-            {phase === 'formation' && 'Squad complete — set your formation and get an AI review.'}
+            {phase === 'formation' && !isReviewing && !review && 'Squad complete — set your formation and get an AI review.'}
+            {(isReviewing || review) && 'The tactical breakdown has been finalized.'}
           </motion.p>
         </div>
 
@@ -135,19 +159,26 @@ export default function Home() {
             </motion.div>
           )}
 
-          {/* ── Formation Picker ── */}
-          {phase === 'formation' && (
+          {(isReviewing || review) && (
+            <ReviewCard
+              key="review"
+              review={review}
+              isLoading={isReviewing}
+              resetGame={onResetGame}
+            />
+          )}
+
+          {phase === 'formation' && !isReviewing && !review && (
             <motion.div
               key="formation"
               initial={{ opacity: 0, y: 24 }}
               animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -24 }}
               transition={{ duration: 0.45 }}
             >
               <FormationPicker
                 players={currentXI}
-                onAIReview={({ formation, players }) => {
-                  console.log('AI Review requested:', formation, players)
-                }}
+                onAIReview={handleAIReview}
               />
             </motion.div>
           )}
@@ -157,10 +188,10 @@ export default function Home() {
              Visible in both "spinning" and "formation" phases so the
              user always sees what they've drafted.                   */}
         <AnimatePresence>
-          {currentXI.length > 0 && phase !== 'picking' && (
+          {currentXI.length > 0 && phase !== 'picking' && !isReviewing && !review && (
             <SquadPanel
               players={currentXI}
-              onReset={resetGame}
+              onReset={onResetGame}
             />
           )}
         </AnimatePresence>
