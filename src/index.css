@@ -1,0 +1,63 @@
+@import "tailwindcss";
+
+/* ─── Design Tokens ─────────────────────────────────────────── */
+:root {
+  --bg-canvas:      #0a0a0a;
+  --bg-surface:     #111111;
+  --bg-card:        #1a1a1a;
+  --accent-gold:    #f59e0b;
+  --accent-green:   #10b981;
+  --accent-blue:    #3b82f6;
+  --text-primary:   #f5f5f5;
+  --text-secondary: #a3a3a3;
+  --text-muted:     #525252;
+  --border-subtle:  rgba(255, 255, 255, 0.06);
+  --border-glow:    rgba(245, 158, 11, 0.25);
+
+  --radius-sm:  6px;
+  --radius-md:  12px;
+  --radius-lg:  20px;
+  --radius-xl:  28px;
+
+  --shadow-card: 0 4px 24px rgba(0, 0, 0, 0.6);
+  --shadow-glow: 0 0 40px rgba(245, 158, 11, 0.15);
+}
+
+/* ─── Base Reset ─────────────────────────────────────────────── */
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  scroll-behavior: smooth;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+  background-color: var(--bg-canvas);
+  color: var(--text-primary);
+  font-family: 'Inter', 'Outfit', system-ui, sans-serif;
+  min-height: 100dvh;
+  line-height: 1.6;
+}
+
+#root {
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+}
+
+/* ─── Scrollbar ───────────────────────────────────────────────── */
+::-webkit-scrollbar        { width: 6px; }
+::-webkit-scrollbar-track  { background: var(--bg-canvas); }
+::-webkit-scrollbar-thumb  { background: var(--text-muted); border-radius: 999px; }
+::-webkit-scrollbar-thumb:hover { background: var(--text-secondary); }
+
+/* ─── Selection ───────────────────────────────────────────────── */
+::selection {
+  background: rgba(245, 158, 11, 0.25);
+  color: var(--text-primary);
+}
