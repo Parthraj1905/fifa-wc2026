@@ -42,6 +42,7 @@ body {
   font-family: 'Inter', 'Outfit', system-ui, sans-serif;
   min-height: 100dvh;
   line-height: 1.6;
+  overflow-x: hidden;
 }
 
 #root {
@@ -60,4 +61,76 @@ body {
 ::selection {
   background: rgba(245, 158, 11, 0.25);
   color: var(--text-primary);
+}
+
+/* ─── Hide scrollbar on horizontal pill strips ──────────────── */
+.picker-pills::-webkit-scrollbar { display: none; }
+
+/* ─── Responsive: Mobile ≤ 480px ─────────────────────────────── */
+@media (max-width: 480px) {
+  .hero-header {
+    padding: 24px 14px 6px !important;
+  }
+
+  .hero-header h1 {
+    font-size: 1.5rem !important;
+  }
+
+  /* Squad panel */
+  .squad-quota-bar {
+    gap: 0;
+  }
+
+  .squad-player-row {
+    gap: 6px !important;
+    padding: 8px 10px !important;
+  }
+
+  .squad-jersey {
+    display: none !important;
+  }
+
+  .squad-club {
+    display: none !important;
+  }
+
+  /* Player picker modal */
+  .picker-modal {
+    border-radius: 16px !important;
+    max-height: 94vh !important;
+  }
+
+  .picker-header {
+    padding: 12px 14px 10px !important;
+  }
+
+  .picker-quota-bar > div {
+    min-width: 36px !important;
+    padding: 5px 5px !important;
+  }
+
+  .player-card-grid {
+    grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)) !important;
+    gap: 8px !important;
+  }
+
+  /* Wheel */
+  .wheel-container {
+    max-width: 320px !important;
+  }
+}
+
+/* ─── Responsive: Tablet ≤ 768px ─────────────────────────────── */
+@media (max-width: 768px) and (min-width: 481px) {
+  .hero-header {
+    padding: 32px 18px 6px !important;
+  }
+
+  .wheel-container {
+    max-width: 380px !important;
+  }
+
+  .player-card-grid {
+    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)) !important;
+  }
 }

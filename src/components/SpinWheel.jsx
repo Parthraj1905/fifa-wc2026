@@ -1,4 +1,4 @@
-import { useState, useRef } from 'react'
+import { useState, useRef, useCallback } from 'react'
 import { motion, animate, useMotionValue } from 'framer-motion'
 import squads from '../data/squads'
 
@@ -32,7 +32,6 @@ const R  = 188
 
 /**
  * SpinWheel
- * @param {string[]}  nations    - array of nation names to display on wheel
  * @param {Function}  onResult   - callback called with winning nation name after spin
  */
 export default function SpinWheel({ onResult }) {
@@ -41,7 +40,6 @@ export default function SpinWheel({ onResult }) {
   const [nations, setNations] = useState(defaultNations)
   const [input,   setInput]   = useState('')
   const [spinning, setSpinning] = useState(false)
-  const [winner,  setWinner]  = useState(null)
 
   /* accumulated absolute rotation so framer-motion animates forward */
   const rotRef  = useRef(0)
@@ -51,10 +49,9 @@ export default function SpinWheel({ onResult }) {
   const segAngle = 360 / N
 
   /* ─── Spin ─────────────────────────────────────────────────────── */
-  const spin = async () => {
+  const spin = useCallback(async () => {
     if (spinning || N < 2) return
     setSpinning(true)
-    setWinner(null)
 
     // Add 1440–2520° of random rotation (4–7 full spins). No targeting.
     const extraDeg = 1440 + Math.random() * 1080
@@ -67,28 +64,17 @@ export default function SpinWheel({ onResult }) {
 
     rotRef.current = target
 
-    /*
-     * Work backwards from where the wheel landed to find the winner.
-     *
-     * Segments are drawn starting at −90° (12 o'clock) going clockwise.
-     * When the wheel rotates +R° clockwise, the fixed pointer at −90° (top)
-     * is now pointing at wheel-local angle (−90° − R).
-     * Relative to the first segment's start (−90°), the offset is just −R.
-     *
-     * We therefore NEGATE the rotation before mod-ing:
-     *   finalAngle  = (−totalRotation) mod 360
-     *   segIndex    = floor(finalAngle / segAngle)
-     *
-     * Using +target here instead of −target is the classic off-by-mirror bug
-     * that swaps symmetric segments (e.g. Brazil↔England, Spain↔Argentina).
-     */
     const finalAngle = ((-target % 360) + 360) % 360
     const segIndex   = Math.floor(finalAngle / segAngle) % N
 
     setSpinning(false)
-    setWinner(nations[segIndex])
-    onResult?.(nations[segIndex])
-  }
+
+    // Delay onResult by one frame so the spin animation's last frame settles
+    // before React triggers the phase change and heavy PlayerPicker mount
+    requestAnimationFrame(() => {
+      onResult?.(nations[segIndex])
+    })
+  }, [spinning, N, rotMV, segAngle, nations, onResult])
 
   /* ─── Nation list management ───────────────────────────────────── */
   const addNation = () => {
@@ -101,7 +87,6 @@ export default function SpinWheel({ onResult }) {
   const removeNation = (n) => {
     if (nations.length <= 2) return
     setNations(p => p.filter(x => x !== n))
-    if (winner === n) setWinner(null)
   }
 
   /* ─── Render ───────────────────────────────────────────────────── */
@@ -112,8 +97,8 @@ export default function SpinWheel({ onResult }) {
         display: 'flex',
         flexDirection: 'column',
         alignItems: 'center',
-        gap: '28px',
-        padding: '40px 24px',
+        gap: '24px',
+        padding: '32px 16px',
         width: '100%',
         maxWidth: '560px',
         margin: '0 auto',
@@ -133,10 +118,11 @@ export default function SpinWheel({ onResult }) {
             aria-label="Nation name"
             style={{
               flex: 1,
+              minWidth: 0,
               background: 'rgba(255,255,255,0.05)',
               border: '1px solid rgba(255,255,255,0.1)',
               borderRadius: '10px',
-              padding: '10px 16px',
+              padding: '10px 14px',
               color: '#f5f5f5',
               fontSize: '14px',
               fontFamily: 'Inter, sans-serif',
@@ -150,7 +136,7 @@ export default function SpinWheel({ onResult }) {
             id="add-nation-btn"
             onClick={addNation}
             style={{
-              padding: '10px 20px',
+              padding: '10px 16px',
               background: 'rgba(245,158,11,0.12)',
               border: '1px solid rgba(245,158,11,0.28)',
               borderRadius: '10px',
@@ -160,6 +146,7 @@ export default function SpinWheel({ onResult }) {
               cursor: 'pointer',
               fontFamily: 'Inter, sans-serif',
               transition: 'background 0.2s',
+              flexShrink: 0,
             }}
             onMouseEnter={e => (e.currentTarget.style.background = 'rgba(245,158,11,0.22)')}
             onMouseLeave={e => (e.currentTarget.style.background = 'rgba(245,158,11,0.12)')}
@@ -172,34 +159,30 @@ export default function SpinWheel({ onResult }) {
         <div
           role="list"
           aria-label="Nations in wheel"
-          style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}
+          style={{ display: 'flex', flexWrap: 'wrap', gap: '6px' }}
         >
           {nations.map((n, i) => {
             const color = PALETTE[i % PALETTE.length]
             return (
-              <motion.span
+              <span
                 key={n}
                 role="listitem"
-                initial={{ opacity: 0, scale: 0.75 }}
-                animate={{ opacity: 1, scale: 1 }}
-                exit={{ opacity: 0, scale: 0.75 }}
-                transition={{ type: 'spring', stiffness: 400, damping: 25 }}
                 style={{
                   display: 'inline-flex',
                   alignItems: 'center',
-                  gap: '6px',
+                  gap: '5px',
                   background: `${color}18`,
                   border: `1px solid ${color}42`,
                   borderRadius: '999px',
-                  padding: '5px 10px 5px 9px',
-                  fontSize: '12px',
+                  padding: '4px 9px 4px 8px',
+                  fontSize: '11px',
                   fontWeight: 600,
                   color,
                   fontFamily: 'Inter, sans-serif',
                 }}
               >
                 <span style={{
-                  width: '7px', height: '7px',
+                  width: '6px', height: '6px',
                   borderRadius: '50%', background: color, flexShrink: 0,
                 }} />
                 {n}
@@ -210,7 +193,7 @@ export default function SpinWheel({ onResult }) {
                     style={{
                       background: 'none', border: 'none',
                       color, cursor: 'pointer', opacity: 0.55,
-                      fontSize: '15px', lineHeight: 1, padding: '0 2px',
+                      fontSize: '14px', lineHeight: 1, padding: '0 2px',
                       display: 'flex', alignItems: 'center',
                       transition: 'opacity 0.15s',
                     }}
@@ -220,7 +203,7 @@ export default function SpinWheel({ onResult }) {
                     ×
                   </button>
                 )}
-              </motion.span>
+              </span>
             )
           })}
         </div>
@@ -228,7 +211,8 @@ export default function SpinWheel({ onResult }) {
 
       {/* ── Wheel ────────────────────────────────────────────────── */}
       <div
-        style={{ position: 'relative', display: 'inline-block' }}
+        className="wheel-container"
+        style={{ position: 'relative', width: '100%', maxWidth: '420px' }}
         aria-label="Spin wheel"
       >
         {/* Ambient glow ring – pulses while spinning */}
@@ -250,25 +234,25 @@ export default function SpinWheel({ onResult }) {
           aria-hidden="true"
           style={{
             position: 'absolute',
-            top: '-16px',
+            top: '-14px',
             left: '50%',
             transform: 'translateX(-50%)',
             zIndex: 10,
             width: 0, height: 0,
-            borderLeft: '13px solid transparent',
-            borderRight: '13px solid transparent',
-            borderTop: '24px solid #f59e0b',
+            borderLeft: '11px solid transparent',
+            borderRight: '11px solid transparent',
+            borderTop: '20px solid #f59e0b',
             filter: 'drop-shadow(0 0 10px rgba(245,158,11,0.9))',
           }}
         />
 
-        {/* SVG Wheel */}
+        {/* SVG Wheel — responsive via viewBox + width:100% */}
         <motion.svg
-          width={CX * 2}
-          height={CY * 2}
           viewBox={`0 0 ${CX * 2} ${CY * 2}`}
           style={{
             display: 'block',
+            width: '100%',
+            height: 'auto',
             rotate: rotMV,
             originX: '50%',
             originY: '50%',
@@ -361,7 +345,7 @@ export default function SpinWheel({ onResult }) {
         whileHover={spinning || N < 2 ? {} : { scale: 1.06 }}
         whileTap={spinning || N < 2  ? {} : { scale: 0.94 }}
         style={{
-          padding: '14px 52px',
+          padding: '14px 48px',
           background: spinning
             ? 'rgba(245,158,11,0.08)'
             : 'linear-gradient(135deg, #f59e0b 0%, #f97316 100%)',
@@ -383,51 +367,6 @@ export default function SpinWheel({ onResult }) {
       >
         {spinning ? '⚡ Spinning…' : '🎰 Spin!'}
       </motion.button>
-
-      {/* ── Winner banner ─────────────────────────────────────────── */}
-      {winner && (
-        <motion.div
-          key={winner + Date.now()}
-          initial={{ opacity: 0, y: 24, scale: 0.85 }}
-          animate={{ opacity: 1, y: 0,  scale: 1    }}
-          transition={{ type: 'spring', stiffness: 280, damping: 18 }}
-          role="status"
-          aria-live="polite"
-          style={{
-            padding: '22px 36px',
-            background: 'linear-gradient(135deg, rgba(245,158,11,0.08), rgba(249,115,22,0.05))',
-            border: '1px solid rgba(245,158,11,0.22)',
-            borderRadius: '18px',
-            textAlign: 'center',
-            backdropFilter: 'blur(16px)',
-            width: '100%',
-          }}
-        >
-          <div style={{ fontSize: '30px', marginBottom: '6px' }}>🏆</div>
-          <div style={{
-            fontSize: '11px',
-            color: 'rgba(245,158,11,0.65)',
-            letterSpacing: '0.14em',
-            textTransform: 'uppercase',
-            fontWeight: 600,
-            marginBottom: '8px',
-            fontFamily: 'Inter, sans-serif',
-          }}>
-            Selected Nation
-          </div>
-          <div style={{
-            fontSize: '30px',
-            fontWeight: 800,
-            background: 'linear-gradient(135deg, #f59e0b, #f97316)',
-            WebkitBackgroundClip: 'text',
-            WebkitTextFillColor: 'transparent',
-            backgroundClip: 'text',
-            fontFamily: 'Outfit, Inter, sans-serif',
-          }}>
-            {winner}
-          </div>
-        </motion.div>
-      )}
 
     </section>
   )

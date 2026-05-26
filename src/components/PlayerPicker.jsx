@@ -1,16 +1,22 @@
 import { useEffect, useRef } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import squads from '../data/squads'
-import { MAX_BY_POS } from '../hooks/useSquadBuilder'
+import { MAX_BY_POS, MID_POOL_POSITIONS, MID_POOL_MAX } from '../hooks/useSquadBuilder'
 
 /* ─── Position metadata ─────────────────────────────────────────── */
-const POSITIONS = ['GK', 'DEF', 'MID', 'FWD']
+const POSITIONS = ['GK', 'CB', 'LB', 'RB', 'CM', 'CDM', 'CAM', 'ST', 'RW', 'LW']
 
 const POS_META = {
-  GK: { label: 'Goalkeepers', short: 'GK', color: '#f59e0b', bg: 'rgba(245,158,11,0.14)' },
-  DEF: { label: 'Defenders', short: 'DEF', color: '#3b82f6', bg: 'rgba(59,130,246,0.14)' },
-  MID: { label: 'Midfielders', short: 'MID', color: '#10b981', bg: 'rgba(16,185,129,0.14)' },
-  FWD: { label: 'Forwards', short: 'FWD', color: '#ec4899', bg: 'rgba(236,72,153,0.14)' },
+  GK: { label: 'Goalkeepers', short: 'GK', color: '#FF0000', bg: 'rgba(245,158,11,0.14)' },
+  CB: { label: 'CenterBack', short: 'CB', color: '#FFA500', bg: 'rgba(59,130,246,0.14)' },
+  LB: { label: 'LeftBack', short: 'LB', color: '#FFFF00', bg: 'rgba(16,185,129,0.14)' },
+  RB: { label: 'RightBack', short: 'RB', color: '#FFFF00', bg: 'rgba(16,185,129,0.14)' },
+  CM: { label: 'CenterMid', short: 'CM', color: '#008000', bg: 'rgba(16,185,129,0.14)' },
+  CDM: { label: 'CenterDefensiveMid', short: 'CDM', color: '#008000', bg: 'rgba(16,185,129,0.14)' },
+  CAM: { label: 'CenterAttackingMid', short: 'CAM', color: '#00FFFF', bg: 'rgba(16,185,129,0.14)' },
+  LW: { label: 'LeftWing', short: 'LW', color: '#f7198eff', bg: 'rgba(236,72,153,0.14)' },
+  RW: { label: 'RightWing', short: 'RW', color: '#f7198eff', bg: 'rgba(236,72,153,0.14)' },
+  ST: { label: 'Striker', short: 'ST', color: '#FFFFFF', bg: 'rgba(236,72,153,0.14)' },
 }
 
 const FLAGS = {
@@ -18,6 +24,22 @@ const FLAGS = {
   Argentina: '🇦🇷', England: '🏴󠁧󠁢󠁥󠁮󠁧󠁿', Colombia: '🇨🇴',
   Germany: '🇩🇪', USA: '🇺🇸', Croatia: '🇭🇷',
   Portugal: '🇵🇹',
+}
+
+/** Check if a position slot is full given current squad */
+function isPositionFull(pos, posCounts, midPoolCount) {
+  if (MID_POOL_POSITIONS.includes(pos)) {
+    return midPoolCount >= MID_POOL_MAX
+  }
+  return (posCounts[pos] ?? 0) >= (MAX_BY_POS[pos] ?? 99)
+}
+
+/** Get count/max for a position (respecting mid pool) */
+function getPosQuota(pos, posCounts, midPoolCount) {
+  if (MID_POOL_POSITIONS.includes(pos)) {
+    return { count: midPoolCount, max: MID_POOL_MAX }
+  }
+  return { count: posCounts[pos] ?? 0, max: MAX_BY_POS[pos] ?? 1 }
 }
 
 /**
@@ -39,11 +61,12 @@ export default function PlayerPicker({ nation, position, currentXI = [], onSelec
   // Count current positions so we can cap display
   const posCounts = {}
   currentXI.forEach(p => { posCounts[p.position] = (posCounts[p.position] ?? 0) + 1 })
+  const midPoolCount = currentXI.filter(p => MID_POOL_POSITIONS.includes(p.position)).length
 
-  // Filter: not already picked + position cap not reached
+  // Filter: not already picked + position cap not reached (respecting mid pool)
   const allAvailable = (squads[nation] ?? []).filter(p =>
     !pickedNames.has(p.name) &&
-    (posCounts[p.position] ?? 0) < (MAX_BY_POS[p.position] ?? 99)
+    !isPositionFull(p.position, posCounts, midPoolCount)
   )
 
   // Group by position (only positions that have available players)
@@ -105,14 +128,15 @@ export default function PlayerPicker({ nation, position, currentXI = [], onSelec
         style={{
           position: 'fixed', inset: 0, zIndex: 101,
           display: 'flex', alignItems: 'center', justifyContent: 'center',
-          padding: '16px',
+          padding: '12px',
           pointerEvents: 'none',
         }}
       >
         <div
+          className="picker-modal"
           style={{
             pointerEvents: 'all',
-            width: '100%', maxWidth: '640px', maxHeight: '88vh',
+            width: '100%', maxWidth: '640px', maxHeight: '90vh',
             display: 'flex', flexDirection: 'column',
             background: '#111111',
             border: '1px solid rgba(255,255,255,0.08)',
@@ -122,11 +146,13 @@ export default function PlayerPicker({ nation, position, currentXI = [], onSelec
           }}
         >
           {/* ── Header ─────────────────────────────────────────── */}
-          <div style={{
+          <div className="picker-header" style={{
             display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-            padding: '18px 22px 14px',
+            padding: '16px 18px 12px',
             borderBottom: '1px solid rgba(255,255,255,0.07)',
             flexShrink: 0,
+            flexWrap: 'wrap',
+            gap: '10px',
           }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
               <span style={{ fontSize: '28px', lineHeight: 1 }}>{FLAGS[nation] ?? '🌍'}</span>
@@ -148,38 +174,47 @@ export default function PlayerPicker({ nation, position, currentXI = [], onSelec
               </div>
             </div>
 
-            {/* Position tab pills (scroll to section) */}
-            <div style={{ display: 'flex', gap: '5px', alignItems: 'center', flexWrap: 'wrap' }}>
+            {/* Position tab pills (horizontally scrollable) */}
+            <div className="picker-pills" style={{
+              display: 'flex', gap: '4px', alignItems: 'center',
+              overflowX: 'auto', maxWidth: '100%',
+              scrollbarWidth: 'none',
+              WebkitOverflowScrolling: 'touch',
+              msOverflowStyle: 'none',
+              flexShrink: 0,
+            }}>
               {POSITIONS.map(pos => {
                 const meta = POS_META[pos]
-                const count = posCounts[pos] ?? 0
-                const maxed = count >= MAX_BY_POS[pos]
+                const { count, max } = getPosQuota(pos, posCounts, midPoolCount)
+                const maxed = count >= max
                 const isActive = pos === position
                 return (
                   <button
                     key={pos}
                     onClick={() => sectionRefs.current[pos]?.scrollIntoView({ behavior: 'smooth', block: 'start' })}
-                    title={maxed ? `${pos} limit reached (${count}/${MAX_BY_POS[pos]})` : `${count}/${MAX_BY_POS[pos]}`}
+                    title={maxed ? `${pos} limit reached (${count}/${max})` : `${count}/${max}`}
                     style={{
-                      padding: '3px 9px',
+                      padding: '3px 8px',
                       borderRadius: '999px',
                       border: `1px solid ${maxed ? 'rgba(255,255,255,0.08)' : isActive ? meta.color : 'rgba(255,255,255,0.1)'}`,
                       background: maxed ? 'rgba(255,255,255,0.03)' : isActive ? meta.bg : 'transparent',
                       color: maxed ? 'rgba(255,255,255,0.2)' : isActive ? meta.color : 'rgba(255,255,255,0.4)',
-                      fontSize: '10px', fontWeight: 700, cursor: 'pointer',
+                      fontSize: '9px', fontWeight: 700, cursor: 'pointer',
                       fontFamily: 'Inter, sans-serif', letterSpacing: '0.04em',
                       transition: 'all 0.18s',
                       position: 'relative',
+                      whiteSpace: 'nowrap',
+                      flexShrink: 0,
                     }}
                   >
                     {meta.short}
                     {/* Count badge */}
                     <span style={{
                       marginLeft: '3px',
-                      fontSize: '9px',
+                      fontSize: '8px',
                       opacity: 0.6,
                     }}>
-                      {count}/{MAX_BY_POS[pos]}
+                      {count}/{max}
                     </span>
                     {/* "Full" strikethrough line */}
                     {maxed && (
@@ -196,25 +231,30 @@ export default function PlayerPicker({ nation, position, currentXI = [], onSelec
           </div>
 
           {/* ── Position quota bar ───────────────────────────────── */}
-          <div style={{
+          <div className="picker-quota-bar" style={{
             display: 'flex',
             gap: 0,
             flexShrink: 0,
             borderBottom: '1px solid rgba(255,255,255,0.06)',
+            flexWrap: 'wrap',
           }}>
             {POSITIONS.map(pos => {
               const meta = POS_META[pos]
-              const count = posCounts[pos] ?? 0
-              const max = MAX_BY_POS[pos]
+              const { count, max } = getPosQuota(pos, posCounts, midPoolCount)
               const pct = Math.min((count / max) * 100, 100)
               const full = count >= max
               return (
-                <div key={pos} style={{ flex: 1, padding: '8px 12px', borderRight: '1px solid rgba(255,255,255,0.04)' }}>
+                <div key={pos} style={{
+                  flex: '1 1 auto',
+                  minWidth: '44px',
+                  padding: '6px 8px',
+                  borderRight: '1px solid rgba(255,255,255,0.04)',
+                }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '4px' }}>
-                    <span style={{ fontSize: '9px', fontWeight: 700, color: full ? meta.color : 'rgba(255,255,255,0.35)', fontFamily: 'Inter', letterSpacing: '0.06em' }}>
+                    <span style={{ fontSize: '8px', fontWeight: 700, color: full ? meta.color : 'rgba(255,255,255,0.35)', fontFamily: 'Inter', letterSpacing: '0.06em' }}>
                       {meta.short}
                     </span>
-                    <span style={{ fontSize: '9px', fontWeight: 600, color: full ? meta.color : 'rgba(255,255,255,0.25)', fontFamily: 'Inter' }}>
+                    <span style={{ fontSize: '8px', fontWeight: 600, color: full ? meta.color : 'rgba(255,255,255,0.25)', fontFamily: 'Inter' }}>
                       {count}/{max}
                     </span>
                   </div>
@@ -270,7 +310,7 @@ export default function PlayerPicker({ nation, position, currentXI = [], onSelec
             <div
               style={{
                 overflowY: 'auto', flex: 1,
-                padding: '18px 22px 26px',
+                padding: '16px 16px 24px',
                 scrollbarWidth: 'thin',
                 scrollbarColor: 'rgba(255,255,255,0.1) transparent',
               }}
@@ -310,9 +350,9 @@ export default function PlayerPicker({ nation, position, currentXI = [], onSelec
                     </div>
 
                     {/* Player cards */}
-                    <div style={{
+                    <div className="player-card-grid" style={{
                       display: 'grid',
-                      gridTemplateColumns: 'repeat(auto-fill, minmax(176px, 1fr))',
+                      gridTemplateColumns: 'repeat(auto-fill, minmax(150px, 1fr))',
                       gap: '10px',
                     }}>
                       {players.map((player, cardIdx) => (
@@ -349,7 +389,7 @@ function PlayerCard({ player, meta, onSelect, delayIdx }) {
       aria-label={`Select ${player.name}`}
       style={{
         display: 'flex', flexDirection: 'column', alignItems: 'flex-start',
-        gap: '6px', padding: '14px 14px 12px',
+        gap: '6px', padding: '12px 12px 10px',
         background: 'rgba(255,255,255,0.03)',
         border: '1px solid rgba(255,255,255,0.07)',
         borderRadius: '12px',
@@ -370,8 +410,8 @@ function PlayerCard({ player, meta, onSelect, delayIdx }) {
     >
       {/* Jersey number watermark */}
       <span style={{
-        position: 'absolute', top: '10px', right: '12px',
-        fontSize: '22px', fontWeight: 900,
+        position: 'absolute', top: '8px', right: '10px',
+        fontSize: '20px', fontWeight: 900,
         color: `${meta.color}18`,
         fontFamily: 'Outfit, Inter, sans-serif',
         lineHeight: 1, letterSpacing: '-0.04em', userSelect: 'none',
@@ -393,16 +433,20 @@ function PlayerCard({ player, meta, onSelect, delayIdx }) {
 
       {/* Name */}
       <span style={{
-        fontSize: '13px', fontWeight: 700, color: '#f0f0f0',
+        fontSize: '12px', fontWeight: 700, color: '#f0f0f0',
         fontFamily: 'Inter, sans-serif', lineHeight: 1.3, paddingRight: '24px',
+        overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
+        maxWidth: '100%',
       }}>
         {player.name}
       </span>
 
       {/* Club */}
       <span style={{
-        fontSize: '11px', color: 'rgba(255,255,255,0.35)',
+        fontSize: '10px', color: 'rgba(255,255,255,0.35)',
         fontFamily: 'Inter, sans-serif', fontWeight: 500,
+        overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
+        maxWidth: '100%',
       }}>
         {player.club}
       </span>

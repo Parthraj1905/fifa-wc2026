@@ -47,6 +47,19 @@ const SLOT_TO_POS = {
   ST:  'FWD', LW: 'FWD', RW: 'FWD',
 }
 
+const PLAYER_POS_TO_CAT = {
+  GK: 'GK',
+  CB: 'DEF',
+  LB: 'DEF',
+  RB: 'DEF',
+  CDM: 'MID',
+  CM: 'MID',
+  CAM: 'MID',
+  ST: 'FWD',
+  LW: 'FWD',
+  RW: 'FWD',
+}
+
 const getLastName = (name) => name.trim().split(' ').at(-1)
 
 /* ─── Football pitch SVG ─────────────────────────────────────────── */
@@ -394,7 +407,7 @@ function SlotPickerPanel({ availablePlayers, slotRole, requiredPos, onSelect, on
             </div>
           ) : (
             availablePlayers.map(player => {
-              const c = POS_COLORS[player.position] ?? '#a3a3a3'
+              const c = POS_COLORS[PLAYER_POS_TO_CAT[player.position]] ?? '#a3a3a3'
               return (
                 <motion.button
                   key={player.name}
@@ -602,7 +615,7 @@ export default function FormationPicker({ players = [], onAIReview }) {
             <AnimatePresence>
               {selectedFormation && formationSlots.map((slot, i) => {
                 const player = slotAssignments[i] ?? null
-                const color  = player ? (POS_COLORS[player.position] ?? '#a3a3a3') : '#ffffff'
+                const color  = player ? (POS_COLORS[PLAYER_POS_TO_CAT[player.position]] ?? '#a3a3a3') : '#ffffff'
 
                 return player ? (
                   <FilledSlot
@@ -674,7 +687,7 @@ export default function FormationPicker({ players = [], onAIReview }) {
           const slotRole = formationSlots[activeSlot]?.role ?? ''
           const requiredPos = SLOT_TO_POS[slotRole] ?? null
           const posFilteredPlayers = requiredPos
-            ? availablePlayers.filter(p => p.position === requiredPos)
+            ? availablePlayers.filter(p => PLAYER_POS_TO_CAT[p.position] === requiredPos)
             : availablePlayers
           return (
             <SlotPickerPanel

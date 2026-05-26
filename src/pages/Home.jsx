@@ -1,3 +1,4 @@
+import { startTransition } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import SpinWheel from '../components/SpinWheel'
 import PlayerPicker from '../components/PlayerPicker'
@@ -16,6 +17,13 @@ export default function Home() {
     skipNation,
     resetGame,
   } = useSquadBuilder()
+
+  /* Wrap spin result in startTransition so the wheel exit stays smooth */
+  const onSpinResult = (nation) => {
+    startTransition(() => {
+      handleSpinResult(nation)
+    })
+  }
 
   return (
     <main
@@ -49,7 +57,7 @@ export default function Home() {
       <div style={{ position: 'relative', zIndex: 1, width: '100%' }}>
 
         {/* Hero header */}
-        <div style={{ textAlign: 'center', padding: '40px 24px 8px' }}>
+        <div className="hero-header" style={{ textAlign: 'center', padding: '40px 24px 8px' }}>
           <motion.div
             initial={{ opacity: 0, y: -10 }}
             animate={{ opacity: 1, y: 0 }}
@@ -76,7 +84,7 @@ export default function Home() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.1 }}
             style={{
-              fontSize: 'clamp(2rem, 6vw, 4rem)',
+              fontSize: 'clamp(1.6rem, 6vw, 4rem)',
               fontWeight: 800, letterSpacing: '-0.03em', lineHeight: 1.1,
               fontFamily: 'Outfit, Inter, sans-serif',
             }}
@@ -121,7 +129,7 @@ export default function Home() {
               transition={{ duration: 0.4 }}
             >
               <SpinWheel
-                onResult={handleSpinResult}
+                onResult={onSpinResult}
                 excludeNations={selectedNations}
               />
             </motion.div>
@@ -152,7 +160,6 @@ export default function Home() {
           {currentXI.length > 0 && phase !== 'picking' && (
             <SquadPanel
               players={currentXI}
-              nations={selectedNations}
               onReset={resetGame}
             />
           )}
