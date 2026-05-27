@@ -116,11 +116,22 @@ function CircularScore({ score, label, color }) {
  * ReviewCard Component
  *
  * @param {Object} props
- * @param {Object|null} props.review - The parsed review object from reviewTeam()
- * @param {boolean} props.isLoading - Whether the API request is currently running
- * @param {Function} props.resetGame - Triggered when "Play Again" button is clicked
+ * @param {Object|null} props.review      - The parsed review object from reviewTeam()
+ * @param {boolean} props.isLoading       - Whether the API request is currently running
+ * @param {Function} props.resetGame      - Triggered when "Play Again" button is clicked
+ * @param {{ score1: string, score2: string }} props.scoreLabels
+ *   Labels for the two circular gauges.
+ *   WC default: { score1: 'Squad Balance', score2: 'Formation Fit' }
+ *   IPL:        { score1: 'Batting Depth', score2: 'Bowling Attack' }
+ * @param {'wc'|'ipl'} props.mode
  */
-export default function ReviewCard({ review, isLoading, resetGame }) {
+export default function ReviewCard({
+  review,
+  isLoading,
+  resetGame,
+  scoreLabels = { score1: 'Squad Balance', score2: 'Formation Fit' },
+  mode = 'wc',
+}) {
   const [loadingPhraseIndex, setLoadingPhraseIndex] = useState(0);
 
   // Cycle phrases every 2.5s while loading
@@ -178,7 +189,7 @@ export default function ReviewCard({ review, isLoading, resetGame }) {
               fontSize: "24px",
             }}
           >
-            ⚽
+            {mode === 'ipl' ? '🏏' : '⚽'}
           </span>
         </div>
 
@@ -251,7 +262,7 @@ export default function ReviewCard({ review, isLoading, resetGame }) {
             marginBottom: "28px",
           }}
         >
-          Tactical Assessment
+          {mode === 'ipl' ? 'Cricket XI Assessment' : 'Tactical Assessment'}
         </h2>
 
         {/* Meters Container */}
@@ -265,12 +276,12 @@ export default function ReviewCard({ review, isLoading, resetGame }) {
         >
           <CircularScore
             score={review.balanceScore}
-            label="Squad Balance"
+            label={scoreLabels.score1}
             color="#f59e0b"
           />
           <CircularScore
             score={review.formationScore}
-            label="Formation Fit"
+            label={scoreLabels.score2}
             color="#3b82f6"
           />
         </div>

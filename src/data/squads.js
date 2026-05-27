@@ -359,6 +359,76 @@ const squads = {
     { number: 20, name: "Folarin Balogun", position: "ST", club: "AS Monaco" },
     { number: 21, name: "Tim Weah", position: "RW", club: "Marseille" },
     { number: 23, name: "Alejandro Zendejas", position: "RW", club: "Club América" }
+  ],
+  Belgium: [
+    // Goalkeepers
+    { number: 1, name: "Thibaut Courtois", position: "GK", club: "Real Madrid" },
+    { number: 12, name: "Senne Lammens", position: "GK", club: "Manchester United" },
+    { number: 13, name: "Mike Penders", position: "GK", club: "Strasbourg" },
+
+    // Defenders
+    { number: 2, name: "Zeno Debast", position: "CB", club: "Sporting CP" },
+    { number: 3, name: "Arthur Theate", position: "CB", club: "Eintracht Frankfurt" },
+    { number: 4, name: "Brandon Mechele", position: "CB", club: "Club Brugge" },
+    { number: 5, name: "Maxim De Cuyper", position: "LB", club: "Brighton and Hove Albion" },
+    { number: 15, name: "Thomas Meunier", position: "RB", club: "Lille" },
+    { number: 16, name: "Koni De Winter", position: "CB", club: "AC Milan" },
+    { number: 18, name: "Joaquin Seys", position: "LB", club: "Club Brugge" },
+    { number: 19, name: "Timothy Castagne", position: "RB", club: "Fulham" },
+    { number: 24, name: "Nathan Ngoy", position: "CB", club: "Lille" },
+
+    // Midfielders
+    { number: 6, name: "Axel Witsel", position: "CM", club: "Girona" },
+    { number: 7, name: "Kevin De Bruyne", position: "CAM", club: "Napoli" },
+    { number: 8, name: "Youri Tielemans", position: "CM", club: "Aston Villa" },
+    { number: 20, name: "Hans Vanaken", position: "CAM", club: "Club Brugge" },
+    { number: 22, name: "Amadou Onana", position: "CM", club: "Aston Villa" },
+    { number: 23, name: "Nicolas Raskin", position: "CM", club: "Rangers" },
+
+    // Forwards
+    { number: 9, name: "Charles De Ketelaere", position: "RW", club: "Atalanta" },
+    { number: 10, name: "Romelu Lukaku", position: "ST", club: "Napoli" },
+    { number: 11, name: "Jeremy Doku", position: "LW", club: "Manchester City" },
+    { number: 14, name: "Dodi Lukebakio", position: "RW", club: "Benfica" },
+    { number: 17, name: "Leandro Trossard", position: "LW", club: "Arsenal" },
+    { number: 21, name: "Alexis Saelemaekers", position: "RW", club: "AC Milan" },
+    { number: 25, name: "Diego Moreira", position: "LW", club: "Strasbourg" },
+    { number: 26, name: "Matias Fernandez-Pardo", position: "LW", club: "Lille" }
+  ],
+
+  Turkey: [
+    // Goalkeepers
+    { number: 1, name: "Uğurcan Çakır", position: "GK", club: "Galatasaray" },
+    { number: 12, name: "Altay Bayındır", position: "GK", club: "Manchester United" },
+    { number: 23, name: "Mert Günok", position: "GK", club: "Fenerbahçe" },
+
+    // Defenders
+    { number: 2, name: "Zeki Çelik", position: "RB", club: "AS Roma" },
+    { number: 3, name: "Merih Demiral", position: "CB", club: "Al-Ahli" },
+    { number: 4, name: "Çağlar Söyüncü", position: "CB", club: "Fenerbahçe" },
+    { number: 13, name: "Eren Elmalı", position: "LB", club: "Galatasaray" },
+    { number: 14, name: "Abdülkerim Bardakcı", position: "CB", club: "Galatasaray" },
+    { number: 15, name: "Ozan Kabak", position: "CB", club: "Hoffenheim" },
+    { number: 18, name: "Mert Müldür", position: "RB", club: "Fenerbahçe" },
+    { number: 20, name: "Ferdi Kadıoğlu", position: "LB", club: "Brighton & Hove Albion" },
+
+    // Midfielders
+    { number: 5, name: "Salih Özcan", position: "CM", club: "Borussia Dortmund" },
+    { number: 6, name: "Orkun Kökçü", position: "CM", club: "Beşiktaş" },
+    { number: 8, name: "Arda Güler", position: "CAM", club: "Real Madrid" },
+    { number: 10, name: "Hakan Çalhanoğlu", position: "CM", club: "Inter Milan" },
+    { number: 16, name: "İsmail Yüksek", position: "CM", club: "Fenerbahçe" },
+    { number: 22, name: "Kaan Ayhan", position: "CM", club: "Galatasaray" },
+
+    // Forwards
+    { number: 7, name: "Kerem Aktürkoğlu", position: "LW", club: "Fenerbahçe" },
+    { number: 9, name: "Barış Alper Yılmaz", position: "ST", club: "Galatasaray" },
+    { number: 11, name: "Kenan Yıldız", position: "LW", club: "Juventus" },
+    { number: 17, name: "İrfan Can Kahveci", position: "RW", club: "Kasımpaşa" },
+    { number: 19, name: "Oğuz Aydın", position: "LW", club: "Fenerbahçe" },
+    { number: 21, name: "Yunus Akgün", position: "RW", club: "Galatasaray" },
+    { number: 24, name: "Can Uzun", position: "ST", club: "Eintracht Frankfurt" },
+    { number: 25, name: "Yusuf Sarı", position: "RW", club: "Başakşehir" }
   ]
 
 }

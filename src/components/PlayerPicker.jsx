@@ -1,81 +1,139 @@
 import { useEffect, useRef } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import squads from '../data/squads'
-import { MAX_BY_POS, MID_POOL_POSITIONS, MID_POOL_MAX } from '../hooks/useSquadBuilder'
+import squadsWC from '../data/squads'
+import { MAX_BY_POS, MID_POOL_POSITIONS, MID_POOL_MAX, IPL_MAX_BY_ROLE } from '../hooks/useSquadBuilder'
 
-/* ─── Position metadata ─────────────────────────────────────────── */
-const POSITIONS = ['GK', 'CB', 'LB', 'RB', 'CM', 'CDM', 'CAM', 'ST', 'RW', 'LW']
+/* ─── WC: Position metadata ─────────────────────────────────────── */
+const WC_POSITIONS = ['GK', 'CB', 'LB', 'RB', 'CM', 'CDM', 'CAM', 'LW', 'RW', 'ST']
 
-const POS_META = {
-  GK: { label: 'Goalkeepers', short: 'GK', color: '#FF0000', bg: 'rgba(245,158,11,0.14)' },
-  CB: { label: 'CenterBack', short: 'CB', color: '#FFA500', bg: 'rgba(59,130,246,0.14)' },
-  LB: { label: 'LeftBack', short: 'LB', color: '#FFFF00', bg: 'rgba(16,185,129,0.14)' },
-  RB: { label: 'RightBack', short: 'RB', color: '#FFFF00', bg: 'rgba(16,185,129,0.14)' },
-  CM: { label: 'CenterMid', short: 'CM', color: '#008000', bg: 'rgba(16,185,129,0.14)' },
-  CDM: { label: 'CenterDefensiveMid', short: 'CDM', color: '#008000', bg: 'rgba(16,185,129,0.14)' },
-  CAM: { label: 'CenterAttackingMid', short: 'CAM', color: '#00FFFF', bg: 'rgba(16,185,129,0.14)' },
-  LW: { label: 'LeftWing', short: 'LW', color: '#f7198eff', bg: 'rgba(236,72,153,0.14)' },
-  RW: { label: 'RightWing', short: 'RW', color: '#f7198eff', bg: 'rgba(236,72,153,0.14)' },
-  ST: { label: 'Striker', short: 'ST', color: '#FFFFFF', bg: 'rgba(236,72,153,0.14)' },
+const WC_POS_META = {
+  GK:  { label: 'Goalkeepers',          short: 'GK',  color: '#FF0000',   bg: 'rgba(245,158,11,0.14)' },
+  CB:  { label: 'Center Back',           short: 'CB',  color: '#FFA500',   bg: 'rgba(59,130,246,0.14)' },
+  LB:  { label: 'Left Back',             short: 'LB',  color: '#FFFF00',   bg: 'rgba(16,185,129,0.14)' },
+  RB:  { label: 'Right Back',            short: 'RB',  color: '#FFFF00',   bg: 'rgba(16,185,129,0.14)' },
+  CM:  { label: 'Center Mid',            short: 'CM',  color: '#008000',   bg: 'rgba(16,185,129,0.14)' },
+  CDM: { label: 'Defensive Mid',         short: 'CDM', color: '#008000',   bg: 'rgba(16,185,129,0.14)' },
+  CAM: { label: 'Attacking Mid',         short: 'CAM', color: '#00FFFF',   bg: 'rgba(16,185,129,0.14)' },
+  LW:  { label: 'Left Wing',             short: 'LW',  color: '#f7198eff', bg: 'rgba(236,72,153,0.14)' },
+  RW:  { label: 'Right Wing',            short: 'RW',  color: '#f7198eff', bg: 'rgba(236,72,153,0.14)' },
+  ST:  { label: 'Striker',               short: 'ST',  color: '#FFFFFF',   bg: 'rgba(236,72,153,0.14)' },
 }
 
+/* ─── IPL: Role metadata ─────────────────────────────────────────── */
+const IPL_ROLES = ['WK', 'BAT', 'AR', 'BWL']
+
+const IPL_ROLE_META = {
+  WK:  { label: 'Wicket Keepers',  short: 'WK',  color: '#f59e0b', bg: 'rgba(245,158,11,0.14)' },
+  BAT: { label: 'Batters',         short: 'BAT', color: '#3b82f6', bg: 'rgba(59,130,246,0.14)'  },
+  AR:  { label: 'All-Rounders',    short: 'AR',  color: '#10b981', bg: 'rgba(16,185,129,0.14)'  },
+  BWL: { label: 'Bowlers',         short: 'BWL', color: '#ec4899', bg: 'rgba(236,72,153,0.14)'  },
+}
+
+/* ─── WC flag map ─────────────────────────────────────────────────── */
 const FLAGS = {
   Brazil: '🇧🇷', Spain: '🇪🇸', France: '🇫🇷',
   Argentina: '🇦🇷', England: '🏴󠁧󠁢󠁥󠁮󠁧󠁿', Colombia: '🇨🇴',
   Germany: '🇩🇪', USA: '🇺🇸', Croatia: '🇭🇷',
-  Portugal: '🇵🇹',
+  Portugal: '🇵🇹', Belgium: '🇧🇪', Turkey: '🇹🇷',
 }
 
-/** Check if a position slot is full given current squad */
+/* ─── IPL team icons ──────────────────────────────────────────────── */
+const IPL_ICONS = {
+  'Mumbai Indians':               '🔵',
+  'Chennai Super Kings':          '🟡',
+  'Royal Challengers Bengaluru':  '🔴',
+  'Kolkata Knight Riders':        '🟣',
+  'Rajasthan Royals':             '🩷',
+  'Punjab Kings':                 '🔴',
+  'Delhi Capitals':               '💠',
+  'Sunrisers Hyderabad':          '🟠',
+  'Gujarat Titans':               '🔷',
+  'Lucknow Super Giants':         '🩵',
+}
+
+/* ─── WC helpers ─────────────────────────────────────────────────── */
 function isPositionFull(pos, posCounts, midPoolCount) {
-  if (MID_POOL_POSITIONS.includes(pos)) {
-    return midPoolCount >= MID_POOL_MAX
-  }
+  if (MID_POOL_POSITIONS.includes(pos)) return midPoolCount >= MID_POOL_MAX
   return (posCounts[pos] ?? 0) >= (MAX_BY_POS[pos] ?? 99)
 }
 
-/** Get count/max for a position (respecting mid pool) */
-function getPosQuota(pos, posCounts, midPoolCount) {
-  if (MID_POOL_POSITIONS.includes(pos)) {
-    return { count: midPoolCount, max: MID_POOL_MAX }
-  }
+function getWCPosQuota(pos, posCounts, midPoolCount) {
+  if (MID_POOL_POSITIONS.includes(pos)) return { count: midPoolCount, max: MID_POOL_MAX }
   return { count: posCounts[pos] ?? 0, max: MAX_BY_POS[pos] ?? 1 }
 }
 
 /**
  * PlayerPicker
  *
- * @param {string}   nation     - Nation key from squads.js
- * @param {string}   position   - Position group to auto-scroll to on open
- * @param {object[]} currentXI  - Full current squad for dedup + position-cap filtering
- * @param {Function} onSelect   - Called with player object on card click (no close needed)
- * @param {Function} onSkip     - Optional: shown only if ALL players from this nation are
- *                                unavailable so the user isn't stuck
+ * @param {string}    nation      - Nation/team key
+ * @param {string}    position    - WC: position group to auto-scroll to on open
+ * @param {object[]}  currentXI   - Current squad for dedup + cap filtering
+ * @param {Function}  onSelect    - Called with player object on card click
+ * @param {Function}  onSkip      - Shown when no players are available
+ * @param {'wc'|'ipl'} mode       - Which sport mode
+ * @param {object}    squadsData  - Dataset override (default = WC squads import)
  */
-export default function PlayerPicker({ nation, position, currentXI = [], onSelect, onSkip }) {
+export default function PlayerPicker({
+  nation,
+  position,
+  currentXI = [],
+  onSelect,
+  onSkip,
+  mode = 'wc',
+  squadsData,
+}) {
+  const isIPL = mode === 'ipl'
+  const dataSource = squadsData ?? squadsWC
+
+  const GROUPS   = isIPL ? IPL_ROLES    : WC_POSITIONS
+  const META_MAP = isIPL ? IPL_ROLE_META : WC_POS_META
+
   const sectionRefs = useRef({})
 
   /* ── Build available player list ─────────────────────────────── */
   const pickedNames = new Set(currentXI.map(p => p.name))
 
-  // Count current positions so we can cap display
-  const posCounts = {}
-  currentXI.forEach(p => { posCounts[p.position] = (posCounts[p.position] ?? 0) + 1 })
-  const midPoolCount = currentXI.filter(p => MID_POOL_POSITIONS.includes(p.position)).length
+  let allAvailable
+  let posCounts = {}
+  let midPoolCount = 0
 
-  // Filter: not already picked + position cap not reached (respecting mid pool)
-  const allAvailable = (squads[nation] ?? []).filter(p =>
-    !pickedNames.has(p.name) &&
-    !isPositionFull(p.position, posCounts, midPoolCount)
-  )
+  if (isIPL) {
+    /* IPL: filter by role caps */
+    const roleCounts = {}
+    currentXI.forEach(p => { roleCounts[p.role] = (roleCounts[p.role] ?? 0) + 1 })
 
-  // Group by position (only positions that have available players)
-  const grouped = POSITIONS.reduce((acc, pos) => {
-    acc[pos] = allAvailable.filter(p => p.position === pos)
+    allAvailable = (dataSource[nation] ?? []).filter(p =>
+      !pickedNames.has(p.name) &&
+      (roleCounts[p.role] ?? 0) < (IPL_MAX_BY_ROLE[p.role] ?? 99)
+    )
+  } else {
+    /* WC: filter by position caps */
+    currentXI.forEach(p => { posCounts[p.position] = (posCounts[p.position] ?? 0) + 1 })
+    midPoolCount = currentXI.filter(p => MID_POOL_POSITIONS.includes(p.position)).length
+
+    allAvailable = (dataSource[nation] ?? []).filter(p =>
+      !pickedNames.has(p.name) &&
+      !isPositionFull(p.position, posCounts, midPoolCount)
+    )
+  }
+
+  /* Group by role (IPL) or position (WC) */
+  const getGroup = (p) => isIPL ? p.role : p.position
+  const grouped = GROUPS.reduce((acc, g) => {
+    acc[g] = allAvailable.filter(p => getGroup(p) === g)
     return acc
   }, {})
 
   const hasAnyPlayer = allAvailable.length > 0
+
+  /* ── Quota helpers ───────────────────────────────────────────── */
+  const getQuota = (group) => {
+    if (isIPL) {
+      const count = currentXI.filter(p => p.role === group).length
+      return { count, max: IPL_MAX_BY_ROLE[group] ?? 99 }
+    }
+    return getWCPosQuota(group, posCounts, midPoolCount)
+  }
 
   /* ── Lock body scroll ────────────────────────────────────────── */
   useEffect(() => {
@@ -84,7 +142,7 @@ export default function PlayerPicker({ nation, position, currentXI = [], onSelec
     return () => { document.body.style.overflow = prev }
   }, [])
 
-  /* ── Auto-scroll to position group ──────────────────────────── */
+  /* ── Auto-scroll to position/role group ──────────────────────── */
   useEffect(() => {
     if (!position || !sectionRefs.current[position]) return
     const id = setTimeout(() => {
@@ -93,13 +151,14 @@ export default function PlayerPicker({ nation, position, currentXI = [], onSelec
     return () => clearTimeout(id)
   }, [position])
 
-  /* ── NO Escape / backdrop close — user must pick ─────────────── */
-
   const handleSelect = (player) => { onSelect?.(player) }
+
+  /* ── Header icon ─────────────────────────────────────────────── */
+  const headerIcon = isIPL ? (IPL_ICONS[nation] ?? '🏏') : (FLAGS[nation] ?? '🌍')
 
   return (
     <AnimatePresence>
-      {/* Backdrop — non-interactive (no onClose) */}
+      {/* Backdrop */}
       <motion.div
         key="backdrop"
         initial={{ opacity: 0 }}
@@ -155,7 +214,7 @@ export default function PlayerPicker({ nation, position, currentXI = [], onSelec
             gap: '10px',
           }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-              <span style={{ fontSize: '28px', lineHeight: 1 }}>{FLAGS[nation] ?? '🌍'}</span>
+              <span style={{ fontSize: '28px', lineHeight: 1 }}>{headerIcon}</span>
               <div>
                 <h2 style={{
                   margin: 0, fontSize: '18px', fontWeight: 800,
@@ -170,11 +229,12 @@ export default function PlayerPicker({ nation, position, currentXI = [], onSelec
                   fontFamily: 'Inter, sans-serif',
                 }}>
                   {allAvailable.length} available · pick one
+                  {isIPL && <span style={{ color: 'rgba(245,158,11,0.6)', marginLeft: '6px' }}>🏏 IPL</span>}
                 </p>
               </div>
             </div>
 
-            {/* Position tab pills (horizontally scrollable) */}
+            {/* Role / Position tab pills */}
             <div className="picker-pills" style={{
               display: 'flex', gap: '4px', alignItems: 'center',
               overflowX: 'auto', maxWidth: '100%',
@@ -183,16 +243,16 @@ export default function PlayerPicker({ nation, position, currentXI = [], onSelec
               msOverflowStyle: 'none',
               flexShrink: 0,
             }}>
-              {POSITIONS.map(pos => {
-                const meta = POS_META[pos]
-                const { count, max } = getPosQuota(pos, posCounts, midPoolCount)
+              {GROUPS.map(group => {
+                const meta = META_MAP[group]
+                const { count, max } = getQuota(group)
                 const maxed = count >= max
-                const isActive = pos === position
+                const isActive = group === position
                 return (
                   <button
-                    key={pos}
-                    onClick={() => sectionRefs.current[pos]?.scrollIntoView({ behavior: 'smooth', block: 'start' })}
-                    title={maxed ? `${pos} limit reached (${count}/${max})` : `${count}/${max}`}
+                    key={group}
+                    onClick={() => sectionRefs.current[group]?.scrollIntoView({ behavior: 'smooth', block: 'start' })}
+                    title={maxed ? `${group} limit reached (${count}/${max})` : `${count}/${max}`}
                     style={{
                       padding: '3px 8px',
                       borderRadius: '999px',
@@ -208,15 +268,9 @@ export default function PlayerPicker({ nation, position, currentXI = [], onSelec
                     }}
                   >
                     {meta.short}
-                    {/* Count badge */}
-                    <span style={{
-                      marginLeft: '3px',
-                      fontSize: '8px',
-                      opacity: 0.6,
-                    }}>
+                    <span style={{ marginLeft: '3px', fontSize: '8px', opacity: 0.6 }}>
                       {count}/{max}
                     </span>
-                    {/* "Full" strikethrough line */}
                     {maxed && (
                       <span style={{
                         position: 'absolute', top: '50%', left: '4px', right: '4px',
@@ -230,7 +284,7 @@ export default function PlayerPicker({ nation, position, currentXI = [], onSelec
             </div>
           </div>
 
-          {/* ── Position quota bar ───────────────────────────────── */}
+          {/* ── Quota bar ─────────────────────────────────────────── */}
           <div className="picker-quota-bar" style={{
             display: 'flex',
             gap: 0,
@@ -238,13 +292,13 @@ export default function PlayerPicker({ nation, position, currentXI = [], onSelec
             borderBottom: '1px solid rgba(255,255,255,0.06)',
             flexWrap: 'wrap',
           }}>
-            {POSITIONS.map(pos => {
-              const meta = POS_META[pos]
-              const { count, max } = getPosQuota(pos, posCounts, midPoolCount)
-              const pct = Math.min((count / max) * 100, 100)
+            {GROUPS.map(group => {
+              const meta = META_MAP[group]
+              const { count, max } = getQuota(group)
+              const pct  = Math.min((count / max) * 100, 100)
               const full = count >= max
               return (
-                <div key={pos} style={{
+                <div key={group} style={{
                   flex: '1 1 auto',
                   minWidth: '44px',
                   padding: '6px 8px',
@@ -274,7 +328,6 @@ export default function PlayerPicker({ nation, position, currentXI = [], onSelec
 
           {/* ── Player list OR empty state ───────────────────────── */}
           {!hasAnyPlayer ? (
-            /* All positions maxed or all players already picked for this nation */
             <div style={{
               flex: 1, display: 'flex', flexDirection: 'column',
               alignItems: 'center', justifyContent: 'center',
@@ -286,7 +339,7 @@ export default function PlayerPicker({ nation, position, currentXI = [], onSelec
                 fontFamily: 'Inter, sans-serif', margin: 0, lineHeight: 1.6,
               }}>
                 No available players from <strong style={{ color: '#f5f5f5' }}>{nation}</strong>.
-                <br />All eligible position slots are full.
+                <br />All eligible {isIPL ? 'role' : 'position'} slots are full.
               </p>
               {onSkip && (
                 <motion.button
@@ -306,25 +359,22 @@ export default function PlayerPicker({ nation, position, currentXI = [], onSelec
               )}
             </div>
           ) : (
-            /* Scrollable player list */
-            <div
-              style={{
-                overflowY: 'auto', flex: 1,
-                padding: '16px 16px 24px',
-                scrollbarWidth: 'thin',
-                scrollbarColor: 'rgba(255,255,255,0.1) transparent',
-              }}
-            >
-              {POSITIONS.map((pos, groupIdx) => {
-                const players = grouped[pos]
+            <div style={{
+              overflowY: 'auto', flex: 1,
+              padding: '16px 16px 24px',
+              scrollbarWidth: 'thin',
+              scrollbarColor: 'rgba(255,255,255,0.1) transparent',
+            }}>
+              {GROUPS.map((group, groupIdx) => {
+                const players = grouped[group]
                 if (!players?.length) return null
-                const meta = POS_META[pos]
+                const meta = META_MAP[group]
 
                 return (
                   <section
-                    key={pos}
-                    ref={el => { sectionRefs.current[pos] = el }}
-                    style={{ marginBottom: groupIdx < POSITIONS.length - 1 ? '26px' : 0 }}
+                    key={group}
+                    ref={el => { sectionRefs.current[group] = el }}
+                    style={{ marginBottom: groupIdx < GROUPS.length - 1 ? '26px' : 0 }}
                   >
                     {/* Group header */}
                     <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '12px' }}>
@@ -357,9 +407,10 @@ export default function PlayerPicker({ nation, position, currentXI = [], onSelec
                     }}>
                       {players.map((player, cardIdx) => (
                         <PlayerCard
-                          key={`${player.name}-${player.number}`}
+                          key={player.name}
                           player={player}
                           meta={meta}
+                          isIPL={isIPL}
                           onSelect={handleSelect}
                           delayIdx={cardIdx}
                         />
@@ -377,7 +428,7 @@ export default function PlayerPicker({ nation, position, currentXI = [], onSelec
 }
 
 /* ─── PlayerCard ─────────────────────────────────────────────────── */
-function PlayerCard({ player, meta, onSelect, delayIdx }) {
+function PlayerCard({ player, meta, isIPL, onSelect, delayIdx }) {
   return (
     <motion.button
       initial={{ opacity: 0, y: 12 }}
@@ -408,18 +459,19 @@ function PlayerCard({ player, meta, onSelect, delayIdx }) {
         e.currentTarget.style.boxShadow = 'none'
       }}
     >
-      {/* Jersey number watermark */}
+      {/* Watermark — jersey number (WC) or batting style (IPL) */}
       <span style={{
         position: 'absolute', top: '8px', right: '10px',
-        fontSize: '20px', fontWeight: 900,
-        color: `${meta.color}18`,
+        fontSize: isIPL ? '11px' : '20px', fontWeight: 900,
+        color: `${meta.color}22`,
         fontFamily: 'Outfit, Inter, sans-serif',
-        lineHeight: 1, letterSpacing: '-0.04em', userSelect: 'none',
+        lineHeight: 1, letterSpacing: isIPL ? '0.04em' : '-0.04em',
+        userSelect: 'none',
       }}>
-        {player.number}
+        {isIPL ? player.battingStyle : player.number}
       </span>
 
-      {/* Position badge */}
+      {/* Role / position badge */}
       <span style={{
         display: 'inline-flex', alignItems: 'center',
         padding: '2px 8px',
@@ -441,14 +493,14 @@ function PlayerCard({ player, meta, onSelect, delayIdx }) {
         {player.name}
       </span>
 
-      {/* Club */}
+      {/* Subtitle — club (WC) or nationality (IPL) */}
       <span style={{
         fontSize: '10px', color: 'rgba(255,255,255,0.35)',
         fontFamily: 'Inter, sans-serif', fontWeight: 500,
         overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
         maxWidth: '100%',
       }}>
-        {player.club}
+        {isIPL ? player.nationality : player.club}
       </span>
     </motion.button>
   )

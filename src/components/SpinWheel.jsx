@@ -1,4 +1,4 @@
-import { useState, useRef, useCallback } from 'react'
+import { useState, useRef, useCallback, useEffect } from 'react'
 import { motion, animate, useMotionValue } from 'framer-motion'
 import squads from '../data/squads'
 
@@ -32,14 +32,24 @@ const R  = 188
 
 /**
  * SpinWheel
- * @param {Function}  onResult   - callback called with winning nation name after spin
+ * @param {Function}  onResult       - callback called with winning nation/team name after spin
+ * @param {string[]}  excludeNations - nations already used; removed from the wheel automatically
+ * @param {object}    squadsData     - override the dataset (default = WC squads import)
  */
-export default function SpinWheel({ onResult }) {
-  const defaultNations = Object.keys(squads)
+export default function SpinWheel({ onResult, excludeNations = [], squadsData }) {
+  const data = squadsData ?? squads
+  const defaultNations = Object.keys(data).filter(n => !excludeNations.includes(n))
 
   const [nations, setNations] = useState(defaultNations)
   const [input,   setInput]   = useState('')
   const [spinning, setSpinning] = useState(false)
+
+  // Re-initialise the wheel when the dataset switches (mode change) or exclusions update
+  useEffect(() => {
+    const fresh = Object.keys(squadsData ?? squads).filter(n => !excludeNations.includes(n))
+    setNations(fresh)
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [squadsData, excludeNations.join(',')])
 
   /* accumulated absolute rotation so framer-motion animates forward */
   const rotRef  = useRef(0)
