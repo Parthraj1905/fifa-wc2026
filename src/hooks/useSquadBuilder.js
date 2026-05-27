@@ -20,7 +20,7 @@ export const MID_POOL_MAX = 3
 /** Maximum players allowed per role in the IPL XI */
 export const IPL_MAX_BY_ROLE = {
   WK:  2,
-  BAT: 5,
+  BAT: 6,
   AR:  3,
   BWL: 5,
 }
@@ -28,10 +28,16 @@ export const IPL_MAX_BY_ROLE = {
 /** Minimum players required per role for a balanced IPL XI */
 export const IPL_MIN_BY_ROLE = {
   WK:  1,
-  BAT: 3,
+  BAT: 5,
   AR:  1,
-  BWL: 3,
+  BWL: 4,
 }
+
+/** Max players that can be picked from the same IPL franchise */
+export const IPL_MAX_PER_TEAM = 2
+
+/** Max overseas (non-Indian) players allowed in an IPL XI */
+export const IPL_MAX_OVERSEAS = 4
 
 /**
  * Checks if a completed 11-player IPL XI meets the minimum role requirements.
@@ -89,10 +95,21 @@ export default function useSquadBuilder(mode = 'wc') {
     if (currentXI.some(p => p.name === player.name)) return
 
     if (mode === 'ipl') {
-      /* ── IPL: enforce per-role max caps ──────────────────────── */
+      /* ── IPL: enforce per-role max, team cap, and overseas cap ── */
       const role = player.role
       const roleCount = currentXI.filter(p => p.role === role).length
       if (roleCount >= (IPL_MAX_BY_ROLE[role] ?? 99)) return
+
+      // Team cap — max 2 players from the same franchise
+      const teamCount = currentXI.filter(p => p.team === currentSpin).length
+      if (teamCount >= IPL_MAX_PER_TEAM) return
+
+      // Overseas cap — max 4 non-Indian players
+      const isOverseas = player.nationality !== 'Indian'
+      if (isOverseas) {
+        const overseasCount = currentXI.filter(p => p.nationality !== 'Indian').length
+        if (overseasCount >= IPL_MAX_OVERSEAS) return
+      }
 
       // Embed the team name for display purposes
       const playerWithTeam = { ...player, team: currentSpin }

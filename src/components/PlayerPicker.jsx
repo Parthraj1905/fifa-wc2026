@@ -1,7 +1,7 @@
 import { useEffect, useRef } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import squadsWC from '../data/squads'
-import { MAX_BY_POS, MID_POOL_POSITIONS, MID_POOL_MAX, IPL_MAX_BY_ROLE } from '../hooks/useSquadBuilder'
+import { MAX_BY_POS, MID_POOL_POSITIONS, MID_POOL_MAX, IPL_MAX_BY_ROLE, IPL_MAX_PER_TEAM, IPL_MAX_OVERSEAS } from '../hooks/useSquadBuilder'
 
 /* ─── WC: Position metadata ─────────────────────────────────────── */
 const WC_POSITIONS = ['GK', 'CB', 'LB', 'RB', 'CM', 'CDM', 'CAM', 'LW', 'RW', 'ST']
@@ -96,15 +96,26 @@ export default function PlayerPicker({
   let allAvailable
   let posCounts = {}
   let midPoolCount = 0
+  let teamPickedCount = 0
+  let overseasCount = 0
+  let isTeamFull = false
+  let isOverseasFull = false
 
   if (isIPL) {
-    /* IPL: filter by role caps */
+    /* IPL: filter by role cap, team cap, and overseas cap */
     const roleCounts = {}
     currentXI.forEach(p => { roleCounts[p.role] = (roleCounts[p.role] ?? 0) + 1 })
 
+    teamPickedCount = currentXI.filter(p => p.team === nation).length
+    overseasCount   = currentXI.filter(p => p.nationality !== 'Indian').length
+    isTeamFull      = teamPickedCount >= IPL_MAX_PER_TEAM
+    isOverseasFull  = overseasCount >= IPL_MAX_OVERSEAS
+
     allAvailable = (dataSource[nation] ?? []).filter(p =>
       !pickedNames.has(p.name) &&
-      (roleCounts[p.role] ?? 0) < (IPL_MAX_BY_ROLE[p.role] ?? 99)
+      (roleCounts[p.role] ?? 0) < (IPL_MAX_BY_ROLE[p.role] ?? 99) &&
+      !isTeamFull &&
+      !(isOverseasFull && p.nationality !== 'Indian')
     )
   } else {
     /* WC: filter by position caps */
@@ -230,6 +241,12 @@ export default function PlayerPicker({
                 }}>
                   {allAvailable.length} available · pick one
                   {isIPL && <span style={{ color: 'rgba(245,158,11,0.6)', marginLeft: '6px' }}>🏏 IPL</span>}
+                {isIPL && isTeamFull && (
+                  <span style={{ color: '#ef4444', marginLeft: '6px', fontWeight: 700 }}>· Team Full (2/2)</span>
+                )}
+                {isIPL && isOverseasFull && (
+                  <span style={{ color: '#a78bfa', marginLeft: '6px', fontWeight: 700 }}>· Overseas Full (4/4)</span>
+                )}
                 </p>
               </div>
             </div>
@@ -243,6 +260,34 @@ export default function PlayerPicker({
               msOverflowStyle: 'none',
               flexShrink: 0,
             }}>
+              {/* IPL cap indicators */}
+              {isIPL && (
+                <>
+                  <span style={{
+                    padding: '3px 8px', borderRadius: '999px', flexShrink: 0,
+                    border: `1px solid ${isTeamFull ? 'rgba(239,68,68,0.4)' : 'rgba(255,255,255,0.1)'}`,
+                    background: isTeamFull ? 'rgba(239,68,68,0.12)' : 'transparent',
+                    color: isTeamFull ? '#f87171' : 'rgba(255,255,255,0.35)',
+                    fontSize: '9px', fontWeight: 700,
+                    fontFamily: 'Inter, sans-serif', letterSpacing: '0.04em',
+                    whiteSpace: 'nowrap',
+                  }}>
+                    TEAM {teamPickedCount}/{IPL_MAX_PER_TEAM}
+                  </span>
+                  <span style={{
+                    padding: '3px 8px', borderRadius: '999px', flexShrink: 0,
+                    border: `1px solid ${isOverseasFull ? 'rgba(167,139,250,0.4)' : 'rgba(255,255,255,0.1)'}`,
+                    background: isOverseasFull ? 'rgba(167,139,250,0.1)' : 'transparent',
+                    color: isOverseasFull ? '#a78bfa' : 'rgba(255,255,255,0.35)',
+                    fontSize: '9px', fontWeight: 700,
+                    fontFamily: 'Inter, sans-serif', letterSpacing: '0.04em',
+                    whiteSpace: 'nowrap',
+                  }}>
+                    OS {overseasCount}/{IPL_MAX_OVERSEAS}
+                  </span>
+                  <span style={{ color: 'rgba(255,255,255,0.15)', fontSize: '10px', flexShrink: 0 }}>|</span>
+                </>
+              )}
               {GROUPS.map(group => {
                 const meta = META_MAP[group]
                 const { count, max } = getQuota(group)

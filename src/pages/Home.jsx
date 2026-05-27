@@ -342,6 +342,7 @@ export default function Home({ mode = 'wc' }) {
             <SquadPanel
               players={currentXI}
               onReset={onResetGame}
+              mode={mode}
             />
           )}
         </AnimatePresence>
