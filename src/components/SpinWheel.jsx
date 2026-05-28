@@ -2,11 +2,35 @@ import { useState, useRef, useCallback, useEffect } from 'react'
 import { motion, animate, useMotionValue } from 'framer-motion'
 import squads from '../data/squads'
 
+const COUNTRY_FLAGS = {
+  'Brazil': '🇧🇷',
+  'Spain': '🇪🇸',
+  'France': '🇫🇷',
+  'Argentina': '🇦🇷',
+  'England': '🏴󠁧󠁢󠁥󠁮󠁧󠁿',
+  'Germany': '🇩🇪',
+  'Portugal': '🇵🇹',
+  'Colombia': '🇨🇴',
+  'Croatia': '🇭🇷',
+  'USA': '🇺🇸',
+  'Belgium': '🇧🇪',
+  'Turkey': '🇹🇷',
+  'Netherlands': '🇳🇱',
+  'Norway': '🇳🇴',
+  'South_Africa': '🇿🇦',
+  'South Africa': '🇿🇦',
+  'Switzerland': '🇨🇭',
+}
+
 /* ─── Color palette ──────────────────────────────────────────────── */
 const PALETTE = [
-  '#f59e0b', '#10b981', '#3b82f6', '#8b5cf6', '#ec4899',
-  '#06b6d4', '#f97316', '#84cc16', '#e11d48', '#0ea5e9',
-  '#d946ef', '#22c55e', '#fb923c', '#a3e635', '#facc15',
+  '#f59e0b', '#7b2cbf', '#00f5d4', '#ff0054', '#39ff14',
+  '#0077b6', '#f72585', '#fb923c', '#8338ec', '#84cc16',
+  '#4cc9f0', '#e11d48', '#ff9f1c', '#10b981', '#3b82f6',
+  '#d946ef', '#ffbe0b', '#6366f1', '#ff007f', '#72efdd',
+  '#fb5607', '#14b8a6', '#ff4500', '#0ea5e9', '#b5179e',
+  '#70e000', '#f43f5e', '#06b6d4', '#a3e635', '#a855f7',
+  '#ec4899', '#22c55e', '#3a86c8', '#f97316'
 ]
 
 /* ─── SVG math helpers ───────────────────────────────────────────── */
@@ -28,7 +52,7 @@ function arcPath(cx, cy, r, a0, a1) {
 
 const CX = 210
 const CY = 210
-const R  = 188
+const R = 188
 
 /**
  * SpinWheel
@@ -41,21 +65,21 @@ export default function SpinWheel({ onResult, excludeNations = [], squadsData })
   const defaultNations = Object.keys(data).filter(n => !excludeNations.includes(n))
 
   const [nations, setNations] = useState(defaultNations)
-  const [input,   setInput]   = useState('')
+  const [input, setInput] = useState('')
   const [spinning, setSpinning] = useState(false)
 
   // Re-initialise the wheel when the dataset switches (mode change) or exclusions update
   useEffect(() => {
     const fresh = Object.keys(squadsData ?? squads).filter(n => !excludeNations.includes(n))
     setNations(fresh)
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [squadsData, excludeNations.join(',')])
 
   /* accumulated absolute rotation so framer-motion animates forward */
-  const rotRef  = useRef(0)
-  const rotMV   = useMotionValue(0) // framer-motion MotionValue drives the SVG
+  const rotRef = useRef(0)
+  const rotMV = useMotionValue(0) // framer-motion MotionValue drives the SVG
 
-  const N        = nations.length
+  const N = nations.length
   const segAngle = 360 / N
 
   /* ─── Spin ─────────────────────────────────────────────────────── */
@@ -65,7 +89,7 @@ export default function SpinWheel({ onResult, excludeNations = [], squadsData })
 
     // Add 1440–2520° of random rotation (4–7 full spins). No targeting.
     const extraDeg = 1440 + Math.random() * 1080
-    const target   = rotRef.current + extraDeg
+    const target = rotRef.current + extraDeg
 
     await animate(rotMV, target, {
       duration: 3.2 + Math.random() * 0.8,
@@ -75,7 +99,7 @@ export default function SpinWheel({ onResult, excludeNations = [], squadsData })
     rotRef.current = target
 
     const finalAngle = ((-target % 360) + 360) % 360
-    const segIndex   = Math.floor(finalAngle / segAngle) % N
+    const segIndex = Math.floor(finalAngle / segAngle) % N
 
     setSpinning(false)
 
@@ -139,8 +163,8 @@ export default function SpinWheel({ onResult, excludeNations = [], squadsData })
               outline: 'none',
               transition: 'border-color 0.2s',
             }}
-            onFocus={e  => (e.target.style.borderColor = 'rgba(245,158,11,0.4)')}
-            onBlur={e   => (e.target.style.borderColor = 'rgba(255,255,255,0.1)')}
+            onFocus={e => (e.target.style.borderColor = 'rgba(245,158,11,0.4)')}
+            onBlur={e => (e.target.style.borderColor = 'rgba(255,255,255,0.1)')}
           />
           <button
             id="add-nation-btn"
@@ -272,12 +296,12 @@ export default function SpinWheel({ onResult, excludeNations = [], squadsData })
           <defs>
             {/* Radial highlight per segment (white sheen on outer edge) */}
             <radialGradient id="sheen" cx="50%" cy="20%" r="80%">
-              <stop offset="0%"   stopColor="white" stopOpacity="0.18" />
-              <stop offset="100%" stopColor="white" stopOpacity="0"    />
+              <stop offset="0%" stopColor="white" stopOpacity="0.18" />
+              <stop offset="100%" stopColor="white" stopOpacity="0" />
             </radialGradient>
             {/* Soft shadow vignette */}
             <radialGradient id="vignette" cx="50%" cy="50%" r="50%">
-              <stop offset="70%"  stopColor="black" stopOpacity="0"    />
+              <stop offset="70%" stopColor="black" stopOpacity="0" />
               <stop offset="100%" stopColor="black" stopOpacity="0.35" />
             </radialGradient>
           </defs>
@@ -292,13 +316,15 @@ export default function SpinWheel({ onResult, excludeNations = [], squadsData })
 
           {/* Segments */}
           {nations.map((nation, i) => {
-            const a0    = -90 + i * segAngle
-            const a1    = a0 + segAngle
-            const mid   = (a0 + a1) / 2
+            const a0 = -90 + i * segAngle
+            const a1 = a0 + segAngle
+            const mid = (a0 + a1) / 2
             const [lx, ly] = polar(CX, CY, R * 0.63, mid)
             const color = PALETTE[i % PALETTE.length]
-            const fs    = N > 9 ? 8 : N > 6 ? 10 : 12
-            const label = nation.length > 11 ? nation.slice(0, 10) + '…' : nation
+
+            const flag = COUNTRY_FLAGS[nation]
+            const label = flag || (nation.length > 11 ? nation.slice(0, 10) + '…' : nation)
+            const fs = flag ? 22 : (N > 9 ? 8 : N > 6 ? 10 : 12)
 
             return (
               <g key={nation}>
@@ -343,7 +369,7 @@ export default function SpinWheel({ onResult, excludeNations = [], squadsData })
           {/* Centre hub */}
           <circle cx={CX} cy={CY} r={30} fill="#0f0f0f" stroke="rgba(255,255,255,0.12)" strokeWidth="2" />
           <circle cx={CX} cy={CY} r={14} fill="rgba(245,158,11,0.2)" />
-          <circle cx={CX} cy={CY} r={7}  fill="#f59e0b" />
+          <circle cx={CX} cy={CY} r={7} fill="#f59e0b" />
         </motion.svg>
       </div>
 
@@ -353,7 +379,7 @@ export default function SpinWheel({ onResult, excludeNations = [], squadsData })
         onClick={spin}
         disabled={spinning || N < 2}
         whileHover={spinning || N < 2 ? {} : { scale: 1.06 }}
-        whileTap={spinning || N < 2  ? {} : { scale: 0.94 }}
+        whileTap={spinning || N < 2 ? {} : { scale: 0.94 }}
         style={{
           padding: '14px 48px',
           background: spinning

@@ -7,26 +7,26 @@ import { MAX_BY_POS, MID_POOL_POSITIONS, MID_POOL_MAX, IPL_BAT_WK_POOL_MAX, IPL_
 const WC_POSITIONS = ['GK', 'CB', 'LB', 'RB', 'CM', 'CDM', 'CAM', 'LW', 'RW', 'ST']
 
 const WC_POS_META = {
-  GK:  { label: 'Goalkeepers',          short: 'GK',  color: '#FF0000',   bg: 'rgba(245,158,11,0.14)' },
-  CB:  { label: 'Center Back',           short: 'CB',  color: '#FFA500',   bg: 'rgba(59,130,246,0.14)' },
-  LB:  { label: 'Left Back',             short: 'LB',  color: '#FFFF00',   bg: 'rgba(16,185,129,0.14)' },
-  RB:  { label: 'Right Back',            short: 'RB',  color: '#FFFF00',   bg: 'rgba(16,185,129,0.14)' },
-  CM:  { label: 'Center Mid',            short: 'CM',  color: '#008000',   bg: 'rgba(16,185,129,0.14)' },
-  CDM: { label: 'Defensive Mid',         short: 'CDM', color: '#008000',   bg: 'rgba(16,185,129,0.14)' },
-  CAM: { label: 'Attacking Mid',         short: 'CAM', color: '#00FFFF',   bg: 'rgba(16,185,129,0.14)' },
-  LW:  { label: 'Left Wing',             short: 'LW',  color: '#f7198eff', bg: 'rgba(236,72,153,0.14)' },
-  RW:  { label: 'Right Wing',            short: 'RW',  color: '#f7198eff', bg: 'rgba(236,72,153,0.14)' },
-  ST:  { label: 'Striker',               short: 'ST',  color: '#FFFFFF',   bg: 'rgba(236,72,153,0.14)' },
+  GK: { label: 'Goalkeepers', short: 'GK', color: '#FF0000', bg: 'rgba(245,158,11,0.14)' },
+  CB: { label: 'Center Back', short: 'CB', color: '#FFA500', bg: 'rgba(59,130,246,0.14)' },
+  LB: { label: 'Left Back', short: 'LB', color: '#FFFF00', bg: 'rgba(16,185,129,0.14)' },
+  RB: { label: 'Right Back', short: 'RB', color: '#FFFF00', bg: 'rgba(16,185,129,0.14)' },
+  CM: { label: 'Center Mid', short: 'CM', color: '#008000', bg: 'rgba(16,185,129,0.14)' },
+  CDM: { label: 'Defensive Mid', short: 'CDM', color: '#008000', bg: 'rgba(16,185,129,0.14)' },
+  CAM: { label: 'Attacking Mid', short: 'CAM', color: '#00FFFF', bg: 'rgba(16,185,129,0.14)' },
+  LW: { label: 'Left Wing', short: 'LW', color: '#f7198eff', bg: 'rgba(236,72,153,0.14)' },
+  RW: { label: 'Right Wing', short: 'RW', color: '#f7198eff', bg: 'rgba(236,72,153,0.14)' },
+  ST: { label: 'Striker', short: 'ST', color: '#FFFFFF', bg: 'rgba(236,72,153,0.14)' },
 }
 
 /* ─── IPL: Role metadata ─────────────────────────────────────────── */
 const IPL_ROLES = ['WK', 'BAT', 'AR', 'BWL']
 
 const IPL_ROLE_META = {
-  WK:  { label: 'Wicket Keepers',  short: 'WK',  color: '#f59e0b', bg: 'rgba(245,158,11,0.14)' },
-  BAT: { label: 'Batters',         short: 'BAT', color: '#3b82f6', bg: 'rgba(59,130,246,0.14)'  },
-  AR:  { label: 'All-Rounders',    short: 'AR',  color: '#10b981', bg: 'rgba(16,185,129,0.14)'  },
-  BWL: { label: 'Bowlers',         short: 'BWL', color: '#ec4899', bg: 'rgba(236,72,153,0.14)'  },
+  WK: { label: 'Wicket Keepers', short: 'WK', color: '#f59e0b', bg: 'rgba(245,158,11,0.14)' },
+  BAT: { label: 'Batters', short: 'BAT', color: '#3b82f6', bg: 'rgba(59,130,246,0.14)' },
+  AR: { label: 'All-Rounders', short: 'AR', color: '#10b981', bg: 'rgba(16,185,129,0.14)' },
+  BWL: { label: 'Bowlers', short: 'BWL', color: '#ec4899', bg: 'rgba(236,72,153,0.14)' },
 }
 
 /* ─── WC flag map ─────────────────────────────────────────────────── */
@@ -39,16 +39,16 @@ const FLAGS = {
 
 /* ─── IPL team icons ──────────────────────────────────────────────── */
 const IPL_ICONS = {
-  'Mumbai Indians':               '🔵',
-  'Chennai Super Kings':          '🟡',
-  'Royal Challengers Bengaluru':  '🔴',
-  'Kolkata Knight Riders':        '🟣',
-  'Rajasthan Royals':             '🩷',
-  'Punjab Kings':                 '🔴',
-  'Delhi Capitals':               '💠',
-  'Sunrisers Hyderabad':          '🟠',
-  'Gujarat Titans':               '🔷',
-  'Lucknow Super Giants':         '🩵',
+  'Mumbai Indians': '🔵',
+  'Chennai Super Kings': '🟡',
+  'Royal Challengers Bengaluru': '🔴',
+  'Kolkata Knight Riders': '🟣',
+  'Rajasthan Royals': '🩷',
+  'Punjab Kings': '🔴',
+  'Delhi Capitals': '💠',
+  'Sunrisers Hyderabad': '🟠',
+  'Gujarat Titans': '🔷',
+  'Lucknow Super Giants': '🩵',
 }
 
 /* ─── WC helpers ─────────────────────────────────────────────────── */
@@ -85,7 +85,7 @@ export default function PlayerPicker({
   const isIPL = mode === 'ipl'
   const dataSource = squadsData ?? squadsWC
 
-  const GROUPS   = isIPL ? IPL_ROLES    : WC_POSITIONS
+  const GROUPS = isIPL ? IPL_ROLES : WC_POSITIONS
   const META_MAP = isIPL ? IPL_ROLE_META : WC_POS_META
 
   const sectionRefs = useRef({})
@@ -112,14 +112,14 @@ export default function PlayerPicker({
   if (isIPL) {
     /* IPL: pool cap for WK+BAT, individual cap for BWL, no cap for AR */
     const batWkCount = currentXI.filter(p => p.role === 'WK' || p.role === 'BAT').length
-    const bwlCount   = currentXI.filter(p => p.role === 'BWL').length
+    const bwlCount = currentXI.filter(p => p.role === 'BWL').length
     const isBatWkFull = batWkCount >= IPL_BAT_WK_POOL_MAX
-    const isBwlFull   = bwlCount   >= IPL_BWL_MAX
+    const isBwlFull = bwlCount >= IPL_BWL_MAX
 
-    teamPickedCount = currentXI.filter(p => p.team === nation).length
-    overseasCount   = currentXI.filter(p => p.nationality !== 'Indian').length
-    isTeamFull      = teamPickedCount >= IPL_MAX_PER_TEAM
-    isOverseasFull  = overseasCount >= IPL_MAX_OVERSEAS
+    teamPickedCount = currentXI.filter(p => p.role !== 'DUMMY' && p.team === nation).length
+    overseasCount = currentXI.filter(p => p.role !== 'DUMMY' && p.nationality !== 'Indian').length
+    isTeamFull = teamPickedCount >= IPL_MAX_PER_TEAM
+    isOverseasFull = overseasCount >= IPL_MAX_OVERSEAS
 
     allAvailable = (dataSource[nation] ?? []).filter(p => {
       if (pickedNames.has(p.name)) return false
@@ -260,12 +260,12 @@ export default function PlayerPicker({
                 }}>
                   {allAvailable.length} available · pick one
                   {isIPL && <span style={{ color: 'rgba(245,158,11,0.6)', marginLeft: '6px' }}>🏏 IPL</span>}
-                {isIPL && isTeamFull && (
-                  <span style={{ color: '#ef4444', marginLeft: '6px', fontWeight: 700 }}>· Team Full (2/2)</span>
-                )}
-                {isIPL && isOverseasFull && (
-                  <span style={{ color: '#a78bfa', marginLeft: '6px', fontWeight: 700 }}>· Overseas Full (4/4)</span>
-                )}
+                  {isIPL && isTeamFull && (
+                    <span style={{ color: '#ef4444', marginLeft: '6px', fontWeight: 700 }}>· Team Full (2/2)</span>
+                  )}
+                  {isIPL && isOverseasFull && (
+                    <span style={{ color: '#a78bfa', marginLeft: '6px', fontWeight: 700 }}>· Overseas Full (4/4)</span>
+                  )}
                 </p>
               </div>
             </div>
@@ -359,7 +359,7 @@ export default function PlayerPicker({
             {GROUPS.map(group => {
               const meta = META_MAP[group]
               const { count, max } = getQuota(group)
-              const pct  = Math.min((count / max) * 100, 100)
+              const pct = Math.min((count / max) * 100, 100)
               const full = count >= max
               return (
                 <div key={group} style={{

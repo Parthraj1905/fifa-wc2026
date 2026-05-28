@@ -3,25 +3,25 @@ import { IPL_BAT_WK_POOL_MAX, IPL_BWL_MAX } from '../hooks/useSquadBuilder'
 
 /* ─── Role display config ───────────────────────────────────────── */
 const ROLE_META = {
-  WK:  { label: 'Wicket Keepers', color: '#f59e0b', bg: 'rgba(245,158,11,0.12)',  icon: '🧤' },
-  BAT: { label: 'Batters',        color: '#3b82f6', bg: 'rgba(59,130,246,0.12)',  icon: '🏏' },
-  AR:  { label: 'All-Rounders',   color: '#10b981', bg: 'rgba(16,185,129,0.12)',  icon: '⚡' },
-  BWL: { label: 'Bowlers',        color: '#ec4899', bg: 'rgba(236,72,153,0.12)',  icon: '🔴' },
+  WK: { label: 'Wicket Keepers', color: '#f59e0b', bg: 'rgba(245,158,11,0.12)', icon: '🧤' },
+  BAT: { label: 'Batters', color: '#3b82f6', bg: 'rgba(59,130,246,0.12)', icon: '🏏' },
+  AR: { label: 'All-Rounders', color: '#10b981', bg: 'rgba(16,185,129,0.12)', icon: '⚡' },
+  BWL: { label: 'Bowlers', color: '#ec4899', bg: 'rgba(236,72,153,0.12)', icon: '🔴' },
 }
 
 const ROLE_ORDER = ['WK', 'BAT', 'AR', 'BWL']
 
 const IPL_TEAM_COLORS = {
-  'Mumbai Indians':               '#0057b7',
-  'Chennai Super Kings':          '#e8b429',
-  'Royal Challengers Bengaluru':  '#cc0000',
-  'Kolkata Knight Riders':        '#7b2d8b',
-  'Rajasthan Royals':             '#e8538c',
-  'Punjab Kings':                 '#d4232e',
-  'Delhi Capitals':               '#004c93',
-  'Sunrisers Hyderabad':          '#f26522',
-  'Gujarat Titans':               '#1c3f94',
-  'Lucknow Super Giants':         '#a2d9e7',
+  'Mumbai Indians': '#0057b7',
+  'Chennai Super Kings': '#e8b429',
+  'Royal Challengers Bengaluru': '#cc0000',
+  'Kolkata Knight Riders': '#7b2d8b',
+  'Rajasthan Royals': '#e8538c',
+  'Punjab Kings': '#d4232e',
+  'Delhi Capitals': '#004c93',
+  'Sunrisers Hyderabad': '#f26522',
+  'Gujarat Titans': '#1c3f94',
+  'Lucknow Super Giants': '#a2d9e7',
 }
 
 /**
@@ -42,8 +42,8 @@ export default function IPLSquadReview({ players = [], balanceWarning, onAIRevie
   }, {})
 
   const batWkCount = players.filter(p => p.role === 'WK' || p.role === 'BAT').length
-  const bwlCount   = players.filter(p => p.role === 'BWL').length
-  const arCount    = players.filter(p => p.role === 'AR').length
+  const bwlCount = players.filter(p => p.role === 'BWL').length
+  const arCount = players.filter(p => p.role === 'AR').length
 
   const isBalanced = true
 
@@ -291,7 +291,7 @@ export default function IPLSquadReview({ players = [], balanceWarning, onAIRevie
         id="ipl-ai-review-btn"
         disabled={!isBalanced}
         whileHover={isBalanced ? { scale: 1.04 } : {}}
-        whileTap={isBalanced  ? { scale: 0.96 } : {}}
+        whileTap={isBalanced ? { scale: 0.96 } : {}}
         onClick={() => isBalanced && onAIReview?.()}
         style={{
           width: '100%',
