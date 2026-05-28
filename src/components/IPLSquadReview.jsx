@@ -1,5 +1,5 @@
 import { motion } from 'framer-motion'
-import { IPL_MIN_BY_ROLE } from '../hooks/useSquadBuilder'
+import { IPL_BAT_WK_POOL_MAX, IPL_BWL_MAX } from '../hooks/useSquadBuilder'
 
 /* ─── Role display config ───────────────────────────────────────── */
 const ROLE_META = {
@@ -41,13 +41,11 @@ export default function IPLSquadReview({ players = [], balanceWarning, onAIRevie
     return acc
   }, {})
 
-  /* Count per role for the balance bars */
-  const counts = ROLE_ORDER.reduce((acc, role) => {
-    acc[role] = grouped[role].length
-    return acc
-  }, {})
+  const batWkCount = players.filter(p => p.role === 'WK' || p.role === 'BAT').length
+  const bwlCount   = players.filter(p => p.role === 'BWL').length
+  const arCount    = players.filter(p => p.role === 'AR').length
 
-  const isBalanced = !balanceWarning
+  const isBalanced = true
 
   return (
     <div style={{
@@ -91,63 +89,103 @@ export default function IPLSquadReview({ players = [], balanceWarning, onAIRevie
       {/* ── Balance checker ──────────────────────────────────────── */}
       <div style={{
         width: '100%',
-        background: isBalanced ? 'rgba(16,185,129,0.07)' : 'rgba(239,68,68,0.07)',
-        border: `1px solid ${isBalanced ? 'rgba(16,185,129,0.2)' : 'rgba(239,68,68,0.22)'}`,
+        background: 'rgba(16,185,129,0.07)',
+        border: '1px solid rgba(16,185,129,0.2)',
         borderRadius: '14px',
         padding: '14px 16px',
       }}>
         <div style={{
           display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '12px',
         }}>
-          <span style={{ fontSize: '16px' }}>{isBalanced ? '✅' : '⚠️'}</span>
+          <span style={{ fontSize: '16px' }}>✅</span>
           <span style={{
             fontSize: '13px', fontWeight: 700,
-            color: isBalanced ? '#10b981' : '#f87171',
+            color: '#10b981',
             fontFamily: 'Inter, sans-serif',
           }}>
-            {isBalanced ? 'Well-balanced XI' : balanceWarning}
+            Dream XI Complete!
           </span>
         </div>
 
         {/* Mini role bars */}
         <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
-          {ROLE_ORDER.map(role => {
-            const meta  = ROLE_META[role]
-            const count = counts[role]
-            const min   = IPL_MIN_BY_ROLE[role]
-            const ok    = count >= min
-            return (
-              <div key={role} style={{
-                flex: '1 1 80px',
-                background: 'rgba(255,255,255,0.04)',
-                borderRadius: '10px',
-                padding: '8px 10px',
-                border: `1px solid ${ok ? meta.color + '30' : 'rgba(239,68,68,0.3)'}`,
-              }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '5px', marginBottom: '6px' }}>
-                  <span style={{ fontSize: '12px' }}>{meta.icon}</span>
-                  <span style={{ fontSize: '10px', fontWeight: 700, color: meta.color, fontFamily: 'Inter', letterSpacing: '0.06em' }}>
-                    {role}
-                  </span>
-                  <span style={{ marginLeft: 'auto', fontSize: '12px', fontWeight: 800, color: ok ? '#f5f5f5' : '#f87171', fontFamily: 'Outfit, Inter, sans-serif' }}>
-                    {count}
-                  </span>
-                </div>
-                <div style={{ height: '3px', borderRadius: '2px', background: 'rgba(255,255,255,0.07)' }}>
-                  <div style={{
-                    height: '100%',
-                    width: `${Math.min((count / Math.max(count, min + 1)) * 100, 100)}%`,
-                    background: ok ? meta.color : '#ef4444',
-                    borderRadius: '2px',
-                    transition: 'width 0.4s',
-                  }} />
-                </div>
-                <div style={{ marginTop: '4px', fontSize: '8px', color: 'rgba(255,255,255,0.25)', fontFamily: 'Inter' }}>
-                  min {min}
-                </div>
-              </div>
-            )
-          })}
+          {/* Batting/WK pool */}
+          <div style={{
+            flex: '1 1 120px',
+            background: 'rgba(255,255,255,0.04)',
+            borderRadius: '10px',
+            padding: '8px 10px',
+            border: '1px solid rgba(59,130,246,0.3)',
+          }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '5px', marginBottom: '6px' }}>
+              <span style={{ fontSize: '12px' }}>🏏</span>
+              <span style={{ fontSize: '10px', fontWeight: 700, color: '#3b82f6', fontFamily: 'Inter', letterSpacing: '0.06em' }}>
+                WK + BAT
+              </span>
+              <span style={{ marginLeft: 'auto', fontSize: '12px', fontWeight: 800, color: '#f5f5f5', fontFamily: 'Outfit, Inter, sans-serif' }}>
+                {batWkCount}/{IPL_BAT_WK_POOL_MAX}
+              </span>
+            </div>
+            <div style={{ height: '3px', borderRadius: '2px', background: 'rgba(255,255,255,0.07)' }}>
+              <div style={{
+                height: '100%',
+                width: `${Math.min((batWkCount / IPL_BAT_WK_POOL_MAX) * 100, 100)}%`,
+                background: '#3b82f6',
+                borderRadius: '2px',
+                transition: 'width 0.4s',
+              }} />
+            </div>
+          </div>
+
+          {/* Bowling pool */}
+          <div style={{
+            flex: '1 1 120px',
+            background: 'rgba(255,255,255,0.04)',
+            borderRadius: '10px',
+            padding: '8px 10px',
+            border: '1px solid rgba(236,72,153,0.3)',
+          }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '5px', marginBottom: '6px' }}>
+              <span style={{ fontSize: '12px' }}>🔴</span>
+              <span style={{ fontSize: '10px', fontWeight: 700, color: '#ec4899', fontFamily: 'Inter', letterSpacing: '0.06em' }}>
+                BOWLER
+              </span>
+              <span style={{ marginLeft: 'auto', fontSize: '12px', fontWeight: 800, color: '#f5f5f5', fontFamily: 'Outfit, Inter, sans-serif' }}>
+                {bwlCount}/{IPL_BWL_MAX}
+              </span>
+            </div>
+            <div style={{ height: '3px', borderRadius: '2px', background: 'rgba(255,255,255,0.07)' }}>
+              <div style={{
+                height: '100%',
+                width: `${Math.min((bwlCount / IPL_BWL_MAX) * 100, 100)}%`,
+                background: '#ec4899',
+                borderRadius: '2px',
+                transition: 'width 0.4s',
+              }} />
+            </div>
+          </div>
+
+          {/* All Rounder pool */}
+          <div style={{
+            flex: '1 1 120px',
+            background: 'rgba(255,255,255,0.04)',
+            borderRadius: '10px',
+            padding: '8px 10px',
+            border: '1px solid rgba(16,185,129,0.3)',
+          }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '5px', marginBottom: '6px' }}>
+              <span style={{ fontSize: '12px' }}>⚡</span>
+              <span style={{ fontSize: '10px', fontWeight: 700, color: '#10b981', fontFamily: 'Inter', letterSpacing: '0.06em' }}>
+                ALL ROUND
+              </span>
+              <span style={{ marginLeft: 'auto', fontSize: '12px', fontWeight: 800, color: '#f5f5f5', fontFamily: 'Outfit, Inter, sans-serif' }}>
+                {arCount}
+              </span>
+            </div>
+            <div style={{ fontSize: '8px', color: 'rgba(255,255,255,0.25)', fontFamily: 'Inter' }}>
+              uncapped
+            </div>
+          </div>
         </div>
       </div>
 

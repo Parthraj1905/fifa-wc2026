@@ -2,7 +2,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 import {
   SQUAD_SIZE,
   MAX_BY_POS, MID_POOL_POSITIONS, MID_POOL_MAX,
-  IPL_MIN_BY_ROLE, IPL_MAX_PER_TEAM, IPL_MAX_OVERSEAS,
+  IPL_BAT_WK_POOL_MAX, IPL_BWL_MAX, IPL_MAX_PER_TEAM, IPL_MAX_OVERSEAS,
 } from '../hooks/useSquadBuilder'
 
 /* ─── WC display maps ────────────────────────────────────────────── */
@@ -57,14 +57,6 @@ const IPL_TEAM_COLORS = {
   'Gujarat Titans':               '#1c3f94',
   'Lucknow Super Giants':         '#a2d9e7',
 }
-
-/* IPL quota rows — show progress toward minimums */
-const IPL_QUOTA_ROWS = [
-  { key: 'WK',  label: 'WK',  color: '#f59e0b' },
-  { key: 'BAT', label: 'BAT', color: '#3b82f6' },
-  { key: 'AR',  label: 'AR',  color: '#10b981' },
-  { key: 'BWL', label: 'BWL', color: '#ec4899' },
-]
 
 /**
  * SquadPanel — live tracker shown throughout the game.
@@ -196,28 +188,44 @@ export default function SquadPanel({ players = [], onReset, mode = 'wc' }) {
           flexWrap: 'wrap',
         }}>
           {isIPL ? (
-            /* IPL: show role counts vs minimum required */
-            IPL_QUOTA_ROWS.map(row => {
-              const c     = row.color
-              const count = players.filter(p => p.role === row.key).length
-              const min   = IPL_MIN_BY_ROLE[row.key]
-              const met   = count >= min
-              return (
-                <div key={row.key} style={{
-                  flex: '1 1 auto', minWidth: '48px',
-                  padding: '6px 8px',
-                  borderRight: '1px solid rgba(255,255,255,0.04)',
-                }}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '3px' }}>
-                    <span style={{ fontSize: '8px', fontWeight: 700, color: met ? c : 'rgba(255,255,255,0.3)', fontFamily: 'Inter' }}>{row.label}</span>
-                    <span style={{ fontSize: '8px', color: met ? c : 'rgba(255,255,255,0.2)', fontFamily: 'Inter', fontWeight: 600 }}>{count}/{min}</span>
+            /* IPL: show custom pool limits */
+            (() => {
+              const batWkCount = players.filter(p => p.role === 'WK' || p.role === 'BAT').length
+              const bwlCount   = players.filter(p => p.role === 'BWL').length
+              const arCount    = players.filter(p => p.role === 'AR').length
+
+              const rows = [
+                { label: 'BAT+WK', count: batWkCount, max: IPL_BAT_WK_POOL_MAX, color: '#3b82f6' },
+                { label: 'BWL',    count: bwlCount,   max: IPL_BWL_MAX,          color: '#ec4899' },
+                { label: 'AR',     count: arCount,    max: 11,                  color: '#10b981', noBar: true },
+              ]
+
+              return rows.map(row => {
+                const pct = Math.min((row.count / row.max) * 100, 100)
+                const full = row.count >= row.max
+                return (
+                  <div key={row.label} style={{
+                    flex: '1 1 auto', minWidth: '60px',
+                    padding: '6px 10px',
+                    borderRight: '1px solid rgba(255,255,255,0.04)',
+                  }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '3px' }}>
+                      <span style={{ fontSize: '8px', fontWeight: 700, color: full ? row.color : 'rgba(255,255,255,0.3)', fontFamily: 'Inter' }}>{row.label}</span>
+                      <span style={{ fontSize: '8px', color: full ? row.color : 'rgba(255,255,255,0.2)', fontFamily: 'Inter', fontWeight: 600 }}>
+                        {row.count}{row.noBar ? '' : `/${row.max}`}
+                      </span>
+                    </div>
+                    {!row.noBar ? (
+                      <div style={{ height: '2px', borderRadius: '2px', background: 'rgba(255,255,255,0.06)' }}>
+                        <div style={{ height: '100%', width: `${pct}%`, background: row.color, borderRadius: '2px', transition: 'width 0.4s' }} />
+                      </div>
+                    ) : (
+                      <div style={{ fontSize: '7px', color: 'rgba(255,255,255,0.15)', fontFamily: 'Inter', lineHeight: 1 }}>uncapped</div>
+                    )}
                   </div>
-                  <div style={{ height: '2px', borderRadius: '2px', background: 'rgba(255,255,255,0.06)' }}>
-                    <div style={{ height: '100%', width: `${Math.min((count / min) * 100, 100)}%`, background: met ? c : `${c}66`, borderRadius: '2px', transition: 'width 0.4s' }} />
-                  </div>
-                </div>
-              )
-            })
+                )
+              })
+            })()
           ) : (
             /* WC: show position counts vs caps */
             WC_QUOTA_ROWS.map(row => {

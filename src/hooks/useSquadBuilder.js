@@ -17,51 +17,17 @@ export const MID_POOL_POSITIONS = ['CM', 'CDM', 'CAM']
 export const MID_POOL_MAX = 3
 
 /* ─── IPL constants ─────────────────────────────────────────────── */
-/** Maximum players allowed per role in the IPL XI */
-export const IPL_MAX_BY_ROLE = {
-  WK:  2,
-  BAT: 6,
-  AR:  3,
-  BWL: 5,
-}
+/** WK + BAT combined pool max (no separate cap per role) */
+export const IPL_BAT_WK_POOL_MAX = 6
 
-/** Minimum players required per role for a balanced IPL XI */
-export const IPL_MIN_BY_ROLE = {
-  WK:  1,
-  BAT: 5,
-  AR:  1,
-  BWL: 4,
-}
+/** Maximum Bowlers allowed in the IPL XI */
+export const IPL_BWL_MAX = 5
 
 /** Max players that can be picked from the same IPL franchise */
 export const IPL_MAX_PER_TEAM = 2
 
 /** Max overseas (non-Indian) players allowed in an IPL XI */
 export const IPL_MAX_OVERSEAS = 4
-
-/**
- * Checks if a completed 11-player IPL XI meets the minimum role requirements.
- * @param {object[]} xi  - Array of picked player objects (each has .role)
- * @returns {string|null} Warning message, or null if XI is balanced
- */
-export function computeIPLBalance(xi) {
-  if (xi.length < SQUAD_SIZE) return null   // not yet complete, no warn yet
-
-  const counts = { WK: 0, BAT: 0, AR: 0, BWL: 0 }
-  xi.forEach(p => {
-    if (p.role && counts[p.role] !== undefined) counts[p.role]++
-  })
-
-  const missing = []
-  if (counts.WK  < IPL_MIN_BY_ROLE.WK)  missing.push(`min ${IPL_MIN_BY_ROLE.WK} WK`)
-  if (counts.BAT < IPL_MIN_BY_ROLE.BAT) missing.push(`min ${IPL_MIN_BY_ROLE.BAT} BAT`)
-  if (counts.AR  < IPL_MIN_BY_ROLE.AR)  missing.push(`min ${IPL_MIN_BY_ROLE.AR} AR`)
-  if (counts.BWL < IPL_MIN_BY_ROLE.BWL) missing.push(`min ${IPL_MIN_BY_ROLE.BWL} BWL`)
-
-  return missing.length
-    ? `Unbalanced XI — needs: ${missing.join(' · ')}`
-    : null
-}
 
 /**
  * useSquadBuilder — central state machine for WC 2026 and IPL Squad Builder.
@@ -95,27 +61,39 @@ export default function useSquadBuilder(mode = 'wc') {
     if (currentXI.some(p => p.name === player.name)) return
 
     if (mode === 'ipl') {
-      /* ── IPL: enforce per-role max, team cap, and overseas cap ── */
-      const role = player.role
-      const roleCount = currentXI.filter(p => p.role === role).length
-      if (roleCount >= (IPL_MAX_BY_ROLE[role] ?? 99)) return
+      /* ── WK+BAT combined pool cap (max 6) ───────────────────── */
+      if (player.role === 'WK' || player.role === 'BAT') {
+        const batWkCount = currentXI.filter(p => p.role === 'WK' || p.role === 'BAT').length
+        if (batWkCount >= IPL_BAT_WK_POOL_MAX) return
+      }
 
-      // Team cap — max 2 players from the same franchise
+      /* ── BWL cap (max 5) ─────────────────────────────────── */
+      if (player.role === 'BWL') {
+        const bwlCount = currentXI.filter(p => p.role === 'BWL').length
+        if (bwlCount >= IPL_BWL_MAX) return
+      }
+      /* AR: no cap */
+
+      /* ── Team cap: max 2 per franchise ───────────────────────── */
       const teamCount = currentXI.filter(p => p.team === currentSpin).length
       if (teamCount >= IPL_MAX_PER_TEAM) return
 
-      // Overseas cap — max 4 non-Indian players
+      /* ── Overseas cap: max 4 non-Indian ──────────────────────── */
       const isOverseas = player.nationality !== 'Indian'
       if (isOverseas) {
         const overseasCount = currentXI.filter(p => p.nationality !== 'Indian').length
         if (overseasCount >= IPL_MAX_OVERSEAS) return
       }
 
-      // Embed the team name for display purposes
       const playerWithTeam = { ...player, team: currentSpin }
       const nextLength = currentXI.length + 1
       setCurrentXI(prev => [...prev, playerWithTeam])
-      // IPL mode: wheel keeps all teams (no exclusion after pick)
+
+      /* Exclude team from wheel once the cap is reached */
+      if (currentSpin && teamCount + 1 >= IPL_MAX_PER_TEAM) {
+        setSelectedNations(prev => [...new Set([...prev, currentSpin])])
+      }
+
       setCurrentSpin(null)
       setPhase(nextLength >= SQUAD_SIZE ? 'formation' : 'spinning')
 

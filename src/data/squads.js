@@ -429,6 +429,146 @@ const squads = {
     { number: 21, name: "Yunus Akgün", position: "RW", club: "Galatasaray" },
     { number: 24, name: "Can Uzun", position: "ST", club: "Eintracht Frankfurt" },
     { number: 25, name: "Yusuf Sarı", position: "RW", club: "Başakşehir" }
+  ],
+  Netherlands: [
+    // Goalkeepers
+    { number: 1, name: "Bart Verbruggen", position: "GK", club: "Brighton & Hove Albion" },
+    { number: 13, name: "Mark Flekken", position: "GK", club: "Bayer Leverkusen" },
+    { number: 23, name: "Robin Roefs", position: "GK", club: "Sunderland" },
+
+    // Defenders
+    { number: 2, name: "Denzel Dumfries", position: "RB", club: "Inter Milan" },
+    { number: 3, name: "Micky van de Ven", position: "CB", club: "Tottenham Hotspur" },
+    { number: 4, name: "Virgil van Dijk", position: "CB", club: "Liverpool" },
+    { number: 5, name: "Nathan Aké", position: "LB", club: "Manchester City" },
+    { number: 12, name: "Jorrel Hato", position: "CB", club: "Chelsea" },
+    { number: 14, name: "Jan Paul van Hecke", position: "CB", club: "Brighton & Hove Albion" },
+    { number: 15, name: "Jurrien Timber", position: "RB", club: "Arsenal" },
+
+    // Midfielders
+    { number: 6, name: "Mats Wieffer", position: "CM", club: "Brighton & Hove Albion" },
+    { number: 8, name: "Teun Koopmeiners", position: "CM", club: "Juventus" },
+    { number: 10, name: "Tijjani Reijnders", position: "CM", club: "Manchester City" },
+    { number: 16, name: "Marten de Roon", position: "CM", club: "Atalanta" },
+    { number: 20, name: "Quinten Timber", position: "CM", club: "Olympique Marseille" },
+    { number: 21, name: "Frenkie de Jong", position: "CM", club: "Barcelona" },
+    { number: 24, name: "Guus Til", position: "CAM", club: "PSV Eindhoven" },
+    { number: 25, name: "Justin Kluivert", position: "CAM", club: "Bournemouth" },
+    { number: 26, name: "Ryan Gravenberch", position: "CM", club: "Liverpool" },
+
+    // Forwards
+    { number: 7, name: "Cody Gakpo", position: "LW", club: "Liverpool" },
+    { number: 9, name: "Wout Weghorst", position: "ST", club: "Ajax Amsterdam" },
+    { number: 11, name: "Noa Lang", position: "LW", club: "Galatasaray" },
+    { number: 17, name: "Memphis Depay", position: "ST", club: "Corinthians" },
+    { number: 18, name: "Donyell Malen", position: "RW", club: "AS Roma" },
+    { number: 19, name: "Brian Brobbey", position: "ST", club: "Sunderland" },
+    { number: 22, name: "Crysencio Summerville", position: "RW", club: "West Ham United" }
+  ],
+  Norway: [
+    // Goalkeepers
+    { number: 1, name: "Ørjan Nyland", position: "GK", club: "Sevilla" },
+    { number: 12, name: "Sander Tangvik", position: "GK", club: "Hamburger SV" },
+    { number: 13, name: "Egil Selvik", position: "GK", club: "Watford" },
+
+    // Defenders
+    { number: 3, name: "Kristoffer Ajer", position: "CB", club: "Brentford" },
+    { number: 4, name: "Leo Østigård", position: "CB", club: "Genoa" },
+    { number: 5, name: "David Møller Wolfe", position: "LB", club: "Wolverhampton Wanderers" },
+    { number: 14, name: "Julian Ryerson", position: "RB", club: "Borussia Dortmund" },
+    { number: 15, name: "Fredrik André Bjørkan", position: "LB", club: "Bodø/Glimt" },
+    { number: 16, name: "Marcus Holmgren Pedersen", position: "RB", club: "Torino" },
+    { number: 17, name: "Torbjørn Heggem", position: "CB", club: "Bologna" },
+    { number: 21, name: "Sondre Langås", position: "CB", club: "Derby County" },
+    { number: 24, name: "Henrik Falchener", position: "CB", club: "Viking" },
+
+    // Midfielders
+    { number: 2, name: "Morten Thorsby", position: "CM", club: "Genoa" },
+    { number: 6, name: "Patrick Berg", position: "CDM", club: "Bodø/Glimt" },
+    { number: 8, name: "Sander Berge", position: "CM", club: "Fulham" },
+    { number: 10, name: "Martin Ødegaard", position: "CAM", club: "Arsenal" },
+    { number: 18, name: "Kristian Thorstvedt", position: "CM", club: "Sassuolo" },
+    { number: 25, name: "Fredrik Aursnes", position: "CM", club: "Benfica" },
+    { number: 26, name: "Thelo Aasgaard", position: "CAM", club: "Rangers" },
+
+    // Forwards
+    { number: 7, name: "Alexander Sørloth", position: "ST", club: "Atlético Madrid" },
+    { number: 9, name: "Erling Haaland", position: "ST", club: "Manchester City" },
+    { number: 11, name: "Jørgen Strand Larsen", position: "ST", club: "Crystal Palace" },
+    { number: 20, name: "Antonio Nusa", position: "LW", club: "RB Leipzig" },
+    { number: 22, name: "Oscar Bobb", position: "RW", club: "Fulham" },
+    { number: 23, name: "Jens Petter Hauge", position: "LW", club: "Bodø/Glimt" },
+    { number: 27, name: "Andreas Schjelderup", position: "LW", club: "Benfica" }
+  ],
+  South_Africa: [
+    // Goalkeepers
+    { number: 1, name: "Ronwen Williams", position: "GK", club: "Mamelodi Sundowns" },
+    { number: 16, name: "Ricardo Goss", position: "GK", club: "Siwelele" },
+    { number: 22, name: "Sipho Chaine", position: "GK", club: "Orlando Pirates" },
+
+    // Defenders
+    { number: 2, name: "Khuliso Mudau", position: "RB", club: "Mamelodi Sundowns" },
+    { number: 3, name: "Olwethu Makhanya", position: "CB", club: "Philadelphia Union" },
+    { number: 4, name: "Bradley Cross", position: "CB", club: "Kaizer Chiefs" },
+    { number: 5, name: "Thabang Matuludi", position: "RB", club: "Polokwane City" },
+    { number: 12, name: "Nkosinathi Sibisi", position: "CB", club: "Orlando Pirates" },
+    { number: 14, name: "Aubrey Modiba", position: "LB", club: "Mamelodi Sundowns" },
+    { number: 15, name: "Khulumani Ndamane", position: "CB", club: "Mamelodi Sundowns" },
+    { number: 18, name: "Ime Okon", position: "CB", club: "Hannover 96" },
+    { number: 20, name: "Samukele Kabini", position: "LB", club: "Molde FK" },
+    { number: 24, name: "Mbekezeli Mbokazi", position: "CB", club: "Chicago Fire" },
+
+    // Midfielders
+    { number: 6, name: "Sphephelo Sithole", position: "CM", club: "CD Tondela" },
+    { number: 8, name: "Teboho Mokoena", position: "CM", club: "Mamelodi Sundowns" },
+    { number: 13, name: "Jayden Adams", position: "CM", club: "Mamelodi Sundowns" },
+    { number: 17, name: "Thalente Mbatha", position: "CM", club: "Orlando Pirates" },
+
+    // Forwards
+    { number: 7, name: "Oswin Appollis", position: "LW", club: "Orlando Pirates" },
+    { number: 9, name: "Evidence Makgopa", position: "ST", club: "Orlando Pirates" },
+    { number: 10, name: "Lyle Foster", position: "ST", club: "Burnley" },
+    { number: 11, name: "Themba Zwane", position: "CAM", club: "Mamelodi Sundowns" },
+    { number: 19, name: "Relebohile Mofokeng", position: "LW", club: "Orlando Pirates" },
+    { number: 21, name: "Tshepang Moremi", position: "RW", club: "Orlando Pirates" },
+    { number: 23, name: "Iqraam Rayners", position: "ST", club: "Mamelodi Sundowns" },
+    { number: 25, name: "Patrick Maswanganyi", position: "CAM", club: "Orlando Pirates" },
+    { number: 26, name: "Kamogelo Sebelebele", position: "RW", club: "Orlando Pirates" }
+  ],
+  Switzerland: [
+    // Goalkeepers
+    { number: 1, name: "Gregor Kobel", position: "GK", club: "Borussia Dortmund" },
+    { number: 12, name: "Yvon Mvogo", position: "GK", club: "Lorient" },
+    { number: 21, name: "Marvin Keller", position: "GK", club: "Young Boys" },
+
+    // Defenders
+    { number: 2, name: "Miro Muheim", position: "LB", club: "Hamburg" },
+    { number: 3, name: "Silvan Widmer", position: "RB", club: "Mainz" },
+    { number: 4, name: "Nico Elvedi", position: "CB", club: "Borussia Monchengladbach" },
+    { number: 5, name: "Manuel Akanji", position: "CB", club: "Inter Milan" },
+    { number: 13, name: "Ricardo Rodriguez", position: "LB", club: "Real Betis" },
+    { number: 18, name: "Eray Comert", position: "CB", club: "Valencia" },
+    { number: 20, name: "Luca Jaquez", position: "CB", club: "Stuttgart" },
+    { number: 26, name: "Aurele Amenda", position: "CB", club: "Eintracht Frankfurt" },
+
+    // Midfielders
+    { number: 6, name: "Denis Zakaria", position: "CDM", club: "Monaco" },
+    { number: 8, name: "Remo Freuler", position: "CM", club: "Bologna" },
+    { number: 9, name: "Johan Manzambi", position: "CM", club: "Freiburg" },
+    { number: 10, name: "Granit Xhaka", position: "CM", club: "Sunderland" },
+    { number: 14, name: "Ardon Jashari", position: "CM", club: "AC Milan" },
+    { number: 15, name: "Djibril Sow", position: "CM", club: "Sevilla" },
+    { number: 16, name: "Christian Fassnacht", position: "RM", club: "Young Boys" },
+    { number: 22, name: "Fabian Rieder", position: "CAM", club: "Augsburg" },
+    { number: 24, name: "Michel Aebischer", position: "CM", club: "Pisa" },
+
+    // Forwards
+    { number: 7, name: "Breel Embolo", position: "ST", club: "Rennes" },
+    { number: 11, name: "Dan Ndoye", position: "RW", club: "Nottingham Forest" },
+    { number: 17, name: "Ruben Vargas", position: "LW", club: "Sevilla" },
+    { number: 19, name: "Noah Okafor", position: "ST", club: "Leeds" },
+    { number: 23, name: "Zeki Amdouni", position: "ST", club: "Burnley" },
+    { number: 25, name: "Cedric Itten", position: "ST", club: "Fortuna Dusseldorf" }
   ]
 
 }

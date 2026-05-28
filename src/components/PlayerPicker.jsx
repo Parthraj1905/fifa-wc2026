@@ -1,7 +1,7 @@
-import { useEffect, useRef } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import squadsWC from '../data/squads'
-import { MAX_BY_POS, MID_POOL_POSITIONS, MID_POOL_MAX, IPL_MAX_BY_ROLE, IPL_MAX_PER_TEAM, IPL_MAX_OVERSEAS } from '../hooks/useSquadBuilder'
+import { MAX_BY_POS, MID_POOL_POSITIONS, MID_POOL_MAX, IPL_BAT_WK_POOL_MAX, IPL_BWL_MAX, IPL_MAX_PER_TEAM, IPL_MAX_OVERSEAS } from '../hooks/useSquadBuilder'
 
 /* ─── WC: Position metadata ─────────────────────────────────────── */
 const WC_POSITIONS = ['GK', 'CB', 'LB', 'RB', 'CM', 'CDM', 'CAM', 'LW', 'RW', 'ST']
@@ -89,6 +89,14 @@ export default function PlayerPicker({
   const META_MAP = isIPL ? IPL_ROLE_META : WC_POS_META
 
   const sectionRefs = useRef({})
+  const [isReady, setIsReady] = useState(false)
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setIsReady(true)
+    }, 180)
+    return () => clearTimeout(timer)
+  }, [])
 
   /* ── Build available player list ─────────────────────────────── */
   const pickedNames = new Set(currentXI.map(p => p.name))
@@ -102,21 +110,25 @@ export default function PlayerPicker({
   let isOverseasFull = false
 
   if (isIPL) {
-    /* IPL: filter by role cap, team cap, and overseas cap */
-    const roleCounts = {}
-    currentXI.forEach(p => { roleCounts[p.role] = (roleCounts[p.role] ?? 0) + 1 })
+    /* IPL: pool cap for WK+BAT, individual cap for BWL, no cap for AR */
+    const batWkCount = currentXI.filter(p => p.role === 'WK' || p.role === 'BAT').length
+    const bwlCount   = currentXI.filter(p => p.role === 'BWL').length
+    const isBatWkFull = batWkCount >= IPL_BAT_WK_POOL_MAX
+    const isBwlFull   = bwlCount   >= IPL_BWL_MAX
 
     teamPickedCount = currentXI.filter(p => p.team === nation).length
     overseasCount   = currentXI.filter(p => p.nationality !== 'Indian').length
     isTeamFull      = teamPickedCount >= IPL_MAX_PER_TEAM
     isOverseasFull  = overseasCount >= IPL_MAX_OVERSEAS
 
-    allAvailable = (dataSource[nation] ?? []).filter(p =>
-      !pickedNames.has(p.name) &&
-      (roleCounts[p.role] ?? 0) < (IPL_MAX_BY_ROLE[p.role] ?? 99) &&
-      !isTeamFull &&
-      !(isOverseasFull && p.nationality !== 'Indian')
-    )
+    allAvailable = (dataSource[nation] ?? []).filter(p => {
+      if (pickedNames.has(p.name)) return false
+      if (isTeamFull) return false
+      if (isOverseasFull && p.nationality !== 'Indian') return false
+      if ((p.role === 'WK' || p.role === 'BAT') && isBatWkFull) return false
+      if (p.role === 'BWL' && isBwlFull) return false
+      return true
+    })
   } else {
     /* WC: filter by position caps */
     currentXI.forEach(p => { posCounts[p.position] = (posCounts[p.position] ?? 0) + 1 })
@@ -137,11 +149,19 @@ export default function PlayerPicker({
 
   const hasAnyPlayer = allAvailable.length > 0
 
-  /* ── Quota helpers ───────────────────────────────────────────── */
+  /* Quota helpers */
   const getQuota = (group) => {
     if (isIPL) {
-      const count = currentXI.filter(p => p.role === group).length
-      return { count, max: IPL_MAX_BY_ROLE[group] ?? 99 }
+      /* WK and BAT share the combined pool */
+      if (group === 'WK' || group === 'BAT') {
+        const cnt = currentXI.filter(p => p.role === 'WK' || p.role === 'BAT').length
+        return { count: cnt, max: IPL_BAT_WK_POOL_MAX }
+      }
+      if (group === 'BWL') {
+        return { count: currentXI.filter(p => p.role === 'BWL').length, max: IPL_BWL_MAX }
+      }
+      /* AR: no hard cap, just informational */
+      return { count: currentXI.filter(p => p.role === 'AR').length, max: 11 }
     }
     return getWCPosQuota(group, posCounts, midPoolCount)
   }
@@ -175,13 +195,11 @@ export default function PlayerPicker({
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}
-        transition={{ duration: 0.22 }}
+        transition={{ duration: 0.15 }}
         role="presentation"
         style={{
           position: 'fixed', inset: 0, zIndex: 100,
-          background: 'rgba(0,0,0,0.78)',
-          backdropFilter: 'blur(8px)',
-          WebkitBackdropFilter: 'blur(8px)',
+          background: 'rgba(5, 5, 5, 0.94)',
         }}
       />
 
@@ -191,15 +209,16 @@ export default function PlayerPicker({
         role="dialog"
         aria-modal="true"
         aria-label={`Pick a player from ${nation}`}
-        initial={{ opacity: 0, y: 40, scale: 0.96 }}
+        initial={{ opacity: 0, y: 16, scale: 0.98 }}
         animate={{ opacity: 1, y: 0, scale: 1 }}
-        exit={{ opacity: 0, y: 24, scale: 0.97 }}
-        transition={{ type: 'spring', stiffness: 340, damping: 28 }}
+        exit={{ opacity: 0, y: 8, scale: 0.99 }}
+        transition={{ duration: 0.15 }}
         style={{
           position: 'fixed', inset: 0, zIndex: 101,
           display: 'flex', alignItems: 'center', justifyContent: 'center',
           padding: '12px',
           pointerEvents: 'none',
+          willChange: 'transform',
         }}
       >
         <div
@@ -403,6 +422,53 @@ export default function PlayerPicker({
                 </motion.button>
               )}
             </div>
+          ) : !isReady ? (
+            <div style={{
+              overflowY: 'auto', flex: 1,
+              padding: '16px 16px 24px',
+            }}>
+              {/* Shimmer loading layout */}
+              <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '12px' }}>
+                <span style={{
+                  padding: '3px 10px',
+                  background: 'rgba(255,255,255,0.03)',
+                  border: '1px solid rgba(255,255,255,0.05)',
+                  borderRadius: '999px',
+                  color: 'rgba(255,255,255,0.1)',
+                  fontSize: '11px', fontWeight: 700,
+                  fontFamily: 'Inter, sans-serif',
+                }}>
+                  ---
+                </span>
+                <span style={{ width: '80px', height: '14px', borderRadius: '4px', background: 'rgba(255,255,255,0.05)' }} />
+              </div>
+              <div className="player-card-grid" style={{
+                display: 'grid',
+                gridTemplateColumns: 'repeat(auto-fill, minmax(150px, 1fr))',
+                gap: '10px',
+              }}>
+                {Array.from({ length: 6 }).map((_, i) => (
+                  <motion.div
+                    key={i}
+                    animate={{ opacity: [0.2, 0.4, 0.2] }}
+                    transition={{ duration: 1.5, repeat: Infinity, ease: 'easeInOut', delay: i * 0.1 }}
+                    style={{
+                      display: 'flex', flexDirection: 'column', alignItems: 'flex-start',
+                      gap: '8px', padding: '12px 12px 10px',
+                      background: 'rgba(255,255,255,0.02)',
+                      border: '1px solid rgba(255,255,255,0.05)',
+                      borderRadius: '12px',
+                      width: '100%',
+                      height: '76px',
+                    }}
+                  >
+                    <div style={{ width: '35px', height: '14px', borderRadius: '999px', background: 'rgba(255,255,255,0.06)' }} />
+                    <div style={{ width: '75%', height: '14px', borderRadius: '4px', background: 'rgba(255,255,255,0.06)' }} />
+                    <div style={{ width: '50%', height: '10px', borderRadius: '4px', background: 'rgba(255,255,255,0.03)' }} />
+                  </motion.div>
+                ))}
+              </div>
+            </div>
           ) : (
             <div style={{
               overflowY: 'auto', flex: 1,
@@ -476,9 +542,9 @@ export default function PlayerPicker({
 function PlayerCard({ player, meta, isIPL, onSelect, delayIdx }) {
   return (
     <motion.button
-      initial={{ opacity: 0, y: 12 }}
+      initial={{ opacity: 0, y: 6 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.22, delay: Math.min(delayIdx * 0.03, 0.25) }}
+      transition={{ duration: 0.18 }}
       whileHover={{ scale: 1.03, y: -2 }}
       whileTap={{ scale: 0.97 }}
       onClick={() => onSelect(player)}
